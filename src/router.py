@@ -1,4 +1,5 @@
 from src.config import BASE_PATH
+from src.account.router import account_router
 
 from fastapi import FastAPI, APIRouter
 
@@ -17,4 +18,4 @@ def init_routes(app: FastAPI):
     Função responsável por centralizar a definição de rotas para o serviço
     """
     app.include_router(health_check_router, prefix=BASE_PATH)
-    
+    app.include_router(account_router, prefix=BASE_PATH)
