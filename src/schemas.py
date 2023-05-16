@@ -1,17 +1,17 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Union
+from typing import Union, Optional
 
 
 class Pessoa(BaseModel):
-    id: int
+    id: Optional[int]
     nome: str
     email: str
     cpf: str
     rg: str
     data_nascimento: datetime
-    ddd: Union[str, None] = None
-    numero: Union[str, None] = None
+    ddd: Optional[str] = None
+    numero: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -21,7 +21,7 @@ class PessoaRequest(BaseModel):
     parameter: Pessoa = Field(...)
 
 class Administrador(BaseModel):
-    id: int
+    id: Optional[int]
     nome_usuario: str
     senha: str
 
@@ -30,14 +30,14 @@ class Administrador(BaseModel):
 
 
 class Atleta(BaseModel):
-    id: int
+    id: Optional[int]
 
     class Config:
         orm_mode = True
 
 
 class Treinador(BaseModel):
-    id: int
+    id: Optional[int]
     cref: str
 
     class Config:

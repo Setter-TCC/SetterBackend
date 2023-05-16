@@ -3,7 +3,10 @@ from fastapi import FastAPI
 from src import __version__
 from src.config import BASE_PATH
 from src.router import init_routes
+from src.database import Engine
+import src.models as model
 
+model.Base.metadata.create_all(bind=Engine)
 
 app = FastAPI(
     title="SETTER",

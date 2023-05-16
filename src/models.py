@@ -20,28 +20,28 @@ class Pessoa(Base):
 class Administrador(Base):
     __tablename__ = "administrador"
 
-    id = Column(Integer, ForeignKey("pessoa.id"), nullable=False, unique=True)
+    id = Column(Integer, ForeignKey("pessoa.id"), primary_key=True, nullable=False, unique=True)
     nome_usuario = Column(String, nullable=False)
     senha = Column(String, nullable=False)
 
-    pessoa = relationship("pessoa")
+    pessoa = relationship("Pessoa")
 
 
 class Atleta(Base):
     __tablename__ = "atleta"
 
-    id = Column(Integer, ForeignKey("pessoa.id"), nullable=False, unique=True)
+    id = Column(Integer, ForeignKey("pessoa.id"), primary_key=True, nullable=False, unique=True)
 
-    pessoa = relationship("pessoa")
+    pessoa = relationship("Pessoa")
 
 
 class Treinador(Base):
     __tablename__ = "treinador"
 
-    id = Column(Integer, ForeignKey("pessoa.id"), nullable=False, unique=True)
+    id = Column(Integer, ForeignKey("pessoa.id"), primary_key=True, nullable=False, unique=True)
     cref = Column(String, nullable=False)
 
-    pessoa = relationship("pessoa")
+    pessoa = relationship("Pessoa")
 
 
 class Equipe(Base):
