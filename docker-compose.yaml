@@ -8,9 +8,12 @@ services:
       - '8000:8000'
     volumes:
       - .:/app/
-    depends_on: 
+    depends_on:
         - postgres
-  
+    networks:
+      setter_db_net:
+        - ipv4_address: 172.18.0.3
+
   postgres:
       container_name: setter-postgres
       image: postgres:13
@@ -22,6 +25,9 @@ services:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: password
         POSTGRES_DB: setter
+      networks:
+        setter_db_net:
+          - ipv4_address: 172.18.0.2
   
   pgadmin:
     container_name: setter-pgadmin
@@ -32,3 +38,13 @@ services:
       - PGADMIN_DEFAULT_EMAIL=admin@setter.com
       - PGADMIN_DEFAULT_PASSWORD=postgres
       - PGADMIN_LISTEN_PORT=5454
+    networks:
+      setter_db_net:
+        - ipv4_address: 172.18.0.3
+
+networks:
+  setter_db_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
