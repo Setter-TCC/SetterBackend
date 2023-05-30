@@ -9,34 +9,35 @@ networks:
           gateway: 10.5.0.1
 
 services:
+  postgres:
+    container_name: setter-postgres
+    image: postgres:13
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: setter
+    networks:
+      setter-db-net:
+        ipv4_address: 10.5.0.6
+
   setter-back:
     container_name: setter-back
     build: .
+    command: [ "./scripts/start.sh" ]
     ports:
       - '8000:8000'
     volumes:
       - .:/app/
     depends_on:
-        - postgres
+      - postgres
     networks:
       setter-db-net:
         ipv4_address: 10.5.0.5
 
-  postgres:
-      container_name: setter-postgres
-      image: postgres:13
-      ports:
-        - '5432:5432'
-      volumes:
-        - ./postgres:/var/lib/postgresql/data
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: password
-        POSTGRES_DB: setter
-      networks:
-        setter-db-net:
-          ipv4_address: 10.5.0.6
-  
   pgadmin:
     container_name: setter-pgadmin
     image: dpage/pgadmin4

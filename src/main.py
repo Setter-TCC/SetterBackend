@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from fastapi.middleware.cors import CORSMiddleware
 from src import __version__
 from src.configs.database import Engine
 from src.configs.environment import get_environment_variables
@@ -16,6 +17,16 @@ app = FastAPI(  # TODO: Padronizar a linguagem de escrita do app
     docs_url=f"{env.BASE_PATH}/docs",
     redoc_url=f"{env.BASE_PATH}/redoc",
     openapi_url=f"{env.BASE_PATH}/openapi.json"
+)
+
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_headers=["*"],
+    allow_methods=["*"],
 )
 
 init_routes(app)

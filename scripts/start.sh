@@ -14,7 +14,7 @@ port = int(5432)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.connect(('db', port))
+s.connect(('10.5.0.6', port))
 s.close()
 END
 }
