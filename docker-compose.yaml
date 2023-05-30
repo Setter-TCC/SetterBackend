@@ -1,5 +1,13 @@
 version: '3'
 
+networks:
+  setter-db-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+
 services:
   setter-back:
     container_name: setter-back
@@ -11,8 +19,8 @@ services:
     depends_on:
         - postgres
     networks:
-      setter_db_net:
-        - ipv4_address: 172.18.0.3
+      setter-db-net:
+        ipv4_address: 10.5.0.5
 
   postgres:
       container_name: setter-postgres
@@ -26,8 +34,8 @@ services:
         POSTGRES_PASSWORD: password
         POSTGRES_DB: setter
       networks:
-        setter_db_net:
-          - ipv4_address: 172.18.0.2
+        setter-db-net:
+          ipv4_address: 10.5.0.6
   
   pgadmin:
     container_name: setter-pgadmin
@@ -39,12 +47,5 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=postgres
       - PGADMIN_LISTEN_PORT=5454
     networks:
-      setter_db_net:
-        - ipv4_address: 172.18.0.3
-
-networks:
-  setter_db_net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
+      setter-db-net:
+        ipv4_address: 10.5.0.7
