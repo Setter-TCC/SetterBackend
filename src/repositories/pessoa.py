@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy.exc import DBAPIError
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from src.models import Pessoa
@@ -17,7 +17,7 @@ def create_pessoa(db: Session, pessoa: PessoaSchema):
         db.refresh(_pessoa)
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -26,16 +26,25 @@ def get_pessoas(db: Session, skip: int = 0, limit: int = 100):
         query = db.query(Pessoa).offset(skip).limit(limit).all()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
 def get_pessoa_by_id(db: Session, pessoa_id: UUID):
     try:
-        query = db.query(Pessoa).filter(Pessoa.id == pessoa_id).first()
+        query = db.query(Pessoa).filter_by(id=pessoa_id).first()
         return query
 
-    except DBAPIError:
+    except Exception:
+        return False
+
+
+def get_pessoa_by_email(db: Session, pessoa_email: EmailStr):
+    try:
+        query = db.query(Pessoa).filter_by(email=pessoa_email).first()
+        return query
+
+    except Exception:
         return False
 
 
@@ -46,7 +55,7 @@ def update_pessoa(db: Session, pessoa_id: UUID):
         db.commit()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -56,5 +65,5 @@ def delete_pessoa(db: Session, pessoa_id: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False

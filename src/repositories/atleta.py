@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.models import Atleta
@@ -20,7 +19,7 @@ def create_atleta(db: Session, atleta: AtletaSchema):
 
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -29,7 +28,7 @@ def get_all_atletas(db: Session, skip: int = 0, limit: int = 100):
         query = db.query(Atleta).offset(skip).limit(limit).all()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -38,7 +37,7 @@ def get_atleta_by_id(db: Session, id_atleta: UUID):
         query = db.query(Atleta).filter(Atleta.id == id_atleta).first()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -49,7 +48,7 @@ def update_atleta(db: Session, id_atleta: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -59,5 +58,5 @@ def delete_atleta(db: Session, id_atleta: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False

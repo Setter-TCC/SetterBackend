@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.models import Time
@@ -27,7 +26,7 @@ def get_times(db: Session, skip: int = 0, limit: int = 100):
         query = db.query(Time).offset(skip).limit(limit).all()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -36,7 +35,7 @@ def get_time_by_id(db: Session, time_id: UUID):
         query = db.query(Time).Filter(Time.id == time_id).first()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -47,15 +46,15 @@ def update_time(db: Session, time_id: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
 def delete_time(db: Session, time_id: UUID):
     try:
-        db.query(Time).Filter(Time.id == time_id).delete()
+        db.query(Time).filter(Time.id == time_id).delete()
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False

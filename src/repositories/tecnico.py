@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.models import Treinador
@@ -19,7 +18,7 @@ def create_tecnico(db: Session, tecnico: TreinadorSchema):
 
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -28,7 +27,7 @@ def get_all_tecnicos(db: Session, skip: int = 0, limit: int = 100):
         query = db.query(Treinador).offset(skip).limit(limit).all()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -37,7 +36,7 @@ def get_tecnico_by_id(db: Session, id_tecnico: UUID):
         query = db.query(Treinador).filter(Treinador.id == id_tecnico).first()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -48,7 +47,7 @@ def update_tecnico(db: Session, id_tecnico: UUID):
         db.commit()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -58,5 +57,5 @@ def delete_tecnico(db: Session, id_tecnico: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False

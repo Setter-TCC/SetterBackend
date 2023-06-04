@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from src.models import Administrador
@@ -20,7 +19,7 @@ def create_admin(db: Session, admin: AdministradorSchema):
 
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -29,7 +28,7 @@ def get_all_admins(db: Session, skip: int = 0, limit: int = 100):
         query = db.query(Administrador).offset(skip).limit(limit).all()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -38,7 +37,7 @@ def get_admin_by_id(db: Session, id_admin: UUID):
         query = db.query(Administrador).filter(Administrador.id == id_admin).first()
         return query
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
@@ -49,15 +48,15 @@ def update_admin(db: Session, id_admin: UUID):
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
 
 
-def delete_admin(db: Session, id_admin: UUID):
+def delete_admin(db: Session, admin_id: UUID):
     try:
-        db.query(Administrador).filter(Administrador.id == id_admin).delete()
+        db.query(Administrador).filter(Administrador.id == admin_id).delete()
         db.commit()
         return True
 
-    except DBAPIError:
+    except Exception:
         return False
