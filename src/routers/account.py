@@ -1,89 +1,148 @@
-# Import de utilitários python
 from datetime import datetime
-from typing import Union
 from uuid import uuid4
 
-# Import do fastapi e sqlalchemy
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-import src.repositories.admin as admin_repository
-import src.repositories.integracao as integracao_repository
-# Import de repositories
-import src.repositories.pessoa as pessoa_repository
-import src.repositories.tecnico as tecnico_repository
-import src.repositories.time as time_repository
-# Import de configs
 from src.configs.database import get_db
-# Import de schemas
-from src.schemas.conta import ContaRequest
-from src.schemas.integracao import IntegracaoIntegraSchema
-from src.schemas.pessoa import PessoaSchema
-from src.schemas.tecnico import TreinadorSchema
-# Import de utilitarios de codigo
+from src.repositories import (admin_repository,
+                              integracao_repository,
+                              pessoa_repository,
+                              tecnico_repository,
+                              time_repository)
+from src.schemas import (ContaRequest,
+                         IntegracaoIntegraSchema,
+                         PessoaSchema)
 from src.utils.crypt import crypt_context
+from src.utils.enums import TipoPessoa
+from src.utils.jwt import generate_payload, generate_token
 
 account_router = APIRouter(prefix="/account")
 
 
 @account_router.post("/", tags=["Conta"])
-async def create_account(request: ContaRequest, db: Session = Depends(get_db)):
+async def create_account(request: ContaRequest, db: Session = Depends(get_db)):  # TODO: Normalizar o datetime para utc
+    coach_sent: bool = request.treinador is not None
+    coach_is_admin = request.administrador.email == request.treinador.email if coach_sent else False
+
+    # ID's normalization
     request.administrador.id = uuid4()
     request.time.id = uuid4()
-    if request.treinador:
-        request.treinador.id = uuid4()
+    if coach_sent:
+        if coach_is_admin:
+            request.treinador.id = request.administrador.id
+        else:
+            request.treinador.id = uuid4()
 
-    # Definição de schemas do admin
-    _pessoa_adm = PessoaSchema(id=request.administrador.id, nome=request.administrador.nome,
-                               email=request.administrador.email, cpf=request.administrador.cpf,
-                               rg=request.administrador.rg, data_nascimento=request.administrador.data_nascimento,
-                               telefone=request.administrador.telefone)
-    _administrador = request.administrador
-    _administrador.senha = crypt_context.hash(_administrador.senha)
+    # Team
+    team = request.time
+    team_ok = time_repository.create_time(db=db, time=team)
+    if not team_ok:
+        return JSONResponse(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            content={
+                "msg": "Unable to create entity for team on database"
+            }
+        )
 
-    # Definição de schemas do time
-    _time = request.time
+    # Admin manipulation
+    admin_person = PessoaSchema(id=request.administrador.id, nome=request.administrador.nome,
+                                email=request.administrador.email, cpf=request.administrador.cpf,
+                                rg=request.administrador.rg, data_nascimento=request.administrador.data_nascimento,
+                                telefone=request.administrador.telefone)
+    admin = request.administrador
+    admin.senha = crypt_context.hash(admin.senha)
+    admin_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None, ativo=True,
+                                                tipo_pessoa=TipoPessoa.administrador.value, time_id=team.id,
+                                                pessoa_id=admin.id)
 
-    # Definição de schemas do tecnico
-    _pessoa_tecnico: Union[PessoaSchema, None] = None
-    _tecnico: Union[TreinadorSchema, None] = None
-    if request.treinador:
-        _pessoa_tecnico = PessoaSchema(id=request.treinador.id, nome=request.treinador.nome,
-                                       email=request.treinador.email, cpf=request.treinador.cpf,
-                                       rg=request.treinador.rg, data_nascimento=request.treinador.data_nascimento,
-                                       telefone=request.treinador.telefone)
-        _tecnico = request.treinador
+    admin_person_ok = pessoa_repository.create_pessoa(db=db, pessoa=admin_person)
+    if not admin_person_ok:
+        db.rollback()
+        time_repository.delete_time(db=db, time_id=team.id)
+        return JSONResponse(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            content={
+                "msg": "Unable to create entity for admin person on database"
+            }
+        )
 
-    _integracao_admin: Union[IntegracaoIntegraSchema, None] = None
-    _integracao_tecnico: Union[IntegracaoIntegraSchema, None] = None
+    admin_ok = admin_repository.create_admin(db=db, admin=admin)
+    if not admin_ok:
+        db.rollback()
+        time_repository.delete_time(db=db, time_id=team.id)
+        pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
+        return JSONResponse(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            content={
+                "msg": "Unable to create entity for admin account on database"
+            }
+        )
 
-    # Cadastros de admin
-    pessoa_repository.create_pessoa(db=db, pessoa=_pessoa_adm)
-    admin_repository.create_admin(db=db, admin=_administrador)
+    admin_integration_ok = integracao_repository.create_integracao(db=db, integracao=admin_integration)
+    if not admin_integration_ok:
+        db.rollback()
+        time_repository.delete_time(db=db, time_id=team.id)
+        pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
+        admin_repository.delete_admin(db=db, admin_id=admin.id)
+        return JSONResponse(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            content={
+                "msg": "Unable to link admin to team entities on database."
+            }
+        )
 
-    # Cadastros do time
-    time_repository.create_time(db=db, time=_time)
+    # Coach
+    coach_msg = ""
+    if coach_sent:
+        coach = request.treinador
+        should_create_coach = True
 
-    # Cadastro do técnico, se houver
-    if _tecnico:
-        pessoa_repository.create_pessoa(db=db, pessoa=_pessoa_tecnico)
-        tecnico_repository.create_tecnico(db=db, tecnico=_tecnico)
+        if not coach_is_admin:
+            coach_person = PessoaSchema(id=request.treinador.id, nome=request.treinador.nome,
+                                        email=request.treinador.email, cpf=request.treinador.cpf,
+                                        rg=request.treinador.rg, data_nascimento=request.treinador.data_nascimento,
+                                        telefone=request.treinador.telefone)
+            should_create_coach = pessoa_repository.create_pessoa(db=db, pessoa=coach_person)
 
-    # TODO: Cadastro de integrações
-    # Criação de integrações
-    _integracao_admin = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None, ativo=True,
-                                                tipo_pessoa=1, time_id=_time.id, pessoa_id=_administrador.id)
-    integracao_repository.create_integracao(db=db, integracao=_integracao_admin)
+        if should_create_coach:
+            coach_ok = tecnico_repository.create_tecnico(db=db, tecnico=coach)
+            if coach_ok:
+                coach_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None,
+                                                            ativo=True, tipo_pessoa=TipoPessoa.tecnico.value,
+                                                            time_id=team.id, pessoa_id=admin.id)
+                coach_integration_ok = integracao_repository.create_integracao(db=db, integracao=coach_integration)
 
-    if _tecnico:
-        _integracao_tecnico = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None, ativo=True,
-                                                      tipo_pessoa=3, time_id=_time.id, pessoa_id=_tecnico.id)
-        integracao_repository.create_integracao(db=db, integracao=_integracao_tecnico)
+                if not coach_integration_ok:
+                    tecnico_repository.delete_tecnico(db=db, id_tecnico=coach.id)
+                    coach_msg = "Could not create coach entity on database."
+
+                else:
+                    coach_msg = "Coach created successfully."
+
+            else:
+                coach_msg = "Could not create coach entity on database."
+
+        else:
+            coach_msg = "Could not create coach person entity on database."
+
+    # Token generation
+    token_payload = generate_payload(admin.nome_usuario)
+    token = generate_token(token_payload)
 
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={
-            "msg": "Sucesso"
+            "msg": "Created account successfully",
+            "fields": {
+                "admin": "Admin created sucessfully.",
+                "team": "Team created succesfully.",
+                "coach": coach_msg
+            },
+            "token": {
+                "token": token.get("token"),
+                "expire": token.get("exp")
+            }
         }
     )
