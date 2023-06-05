@@ -20,6 +20,7 @@ def create_atleta(db: Session, atleta: AtletaSchema):
         return True
 
     except Exception:
+        db.rollback()
         return False
 
 
@@ -29,6 +30,7 @@ def get_all_atletas(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
+        db.rollback()
         return False
 
 
@@ -38,6 +40,7 @@ def get_atleta_by_id(db: Session, id_atleta: UUID):
         return query
 
     except Exception:
+        db.rollback()
         return False
 
 
@@ -49,6 +52,7 @@ def update_atleta(db: Session, id_atleta: UUID):
         return True
 
     except Exception:
+        db.rollback()
         return False
 
 
@@ -59,4 +63,5 @@ def delete_atleta(db: Session, id_atleta: UUID):
         return True
 
     except Exception:
+        db.rollback()
         return False
