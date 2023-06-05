@@ -1,0 +1,52 @@
+version: '3'
+
+networks:
+  setter-db-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+
+services:
+  postgres:
+    container_name: setter-postgres
+    image: postgres:13
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: setter
+    networks:
+      setter-db-net:
+        ipv4_address: 10.5.0.6
+
+  setter-back:
+    container_name: setter-back
+    build: .
+    command: [ "./scripts/start.sh" ]
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app/
+    depends_on:
+      - postgres
+    networks:
+      setter-db-net:
+        ipv4_address: 10.5.0.5
+
+  pgadmin:
+    container_name: setter-pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - 5454:5454/tcp
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@setter.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_LISTEN_PORT=5454
+    networks:
+      setter-db-net:
+        ipv4_address: 10.5.0.7
