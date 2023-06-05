@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from src.configs.database import get_db
@@ -12,6 +13,7 @@ from src.repositories import (admin_repository,
                               tecnico_repository,
                               time_repository)
 from src.schemas import (ContaRequest,
+                         LoginSchema,
                          IntegracaoIntegraSchema,
                          PessoaSchema)
 from src.utils.crypt import crypt_context
@@ -21,7 +23,7 @@ from src.utils.jwt import generate_payload, generate_token
 account_router = APIRouter(prefix="/account")
 
 
-@account_router.post("/", tags=["Conta"])
+@account_router.post("/register", tags=["Conta"])
 async def create_account(request: ContaRequest, db: Session = Depends(get_db)):  # TODO: Normalizar o datetime para utc
     coach_sent: bool = request.treinador is not None
     coach_is_admin = request.administrador.email == request.treinador.email if coach_sent else False
@@ -140,6 +142,42 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
                 "team": "Team created succesfully.",
                 "coach": coach_msg
             },
+            "token": {
+                "token": token.get("token"),
+                "expire": token.get("exp")
+            }
+        }
+    )
+
+
+@account_router.post("/login", tags=["Conta"])
+async def user_login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    admin_login = LoginSchema(nome_usuario=request.username, senha=request.password)
+    admin_on_db = admin_repository.get_admin_by_nome_usuario(db=db, nome_usuario=admin_login.nome_usuario)
+
+    if admin_on_db is None:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "msg": "Invalid username or password."
+            }
+        )
+
+    if not crypt_context.verify(admin_login.senha, admin_on_db.senha):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "msg": "Invalid username or password."
+            }
+        )
+
+    token_payload = generate_payload(admin_on_db.nome_usuario)
+    token = generate_token(token_payload)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Logged in succesfully",
             "token": {
                 "token": token.get("token"),
                 "expire": token.get("exp")
