@@ -41,6 +41,15 @@ def get_admin_by_id(db: Session, id_admin: UUID):
         return False
 
 
+def get_admin_by_nome_usuario(db: Session, nome_usuario: str):
+    try:
+        query = db.query(Administrador).filter_by(nome_usuario=nome_usuario).first()
+        return query
+
+    except Exception:
+        return None
+
+
 def update_admin(db: Session, id_admin: UUID):
     try:
         query = db.query(Administrador).filter(Administrador.id == id_admin)
