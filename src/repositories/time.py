@@ -18,7 +18,6 @@ def create_time(db: Session, time: TimeSchema):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -28,7 +27,6 @@ def get_times(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -38,7 +36,6 @@ def get_time_by_id(db: Session, time_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -50,7 +47,6 @@ def update_time(db: Session, time_id: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -61,5 +57,4 @@ def delete_time(db: Session, time_id: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False

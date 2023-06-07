@@ -23,6 +23,7 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
 
     pessoa_atleta_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)
     if not pessoa_atleta_ok:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail="Could not create person entity on database."
@@ -30,6 +31,7 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
 
     atleta_ok = atleta_repository.create_atleta(db=db, atleta=atleta)
     if not atleta_ok:
+        db.rollback()
         pessoa_repository.delete_pessoa(db=db, pessoa_id=pessoa_atleta.id)
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -38,6 +40,7 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
 
     integracao_ok = integracao_repository.create_integracao(db=db, integracao=integracao)
     if not integracao_ok:
+        db.rollback()
         pessoa_repository.delete_pessoa(db=db, pessoa_id=pessoa_atleta.id)
         atleta_repository.delete_atleta(db=db, id_atleta=atleta.id)
         raise HTTPException(

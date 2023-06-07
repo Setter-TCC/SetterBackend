@@ -18,7 +18,6 @@ def create_pessoa(db: Session, pessoa: PessoaSchema):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -28,7 +27,6 @@ def get_pessoas(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -38,7 +36,6 @@ def get_pessoa_by_id(db: Session, pessoa_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -48,7 +45,6 @@ def get_pessoa_by_email(db: Session, pessoa_email: EmailStr):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -60,7 +56,6 @@ def update_pessoa(db: Session, pessoa_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -71,5 +66,4 @@ def delete_pessoa(db: Session, pessoa_id: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False

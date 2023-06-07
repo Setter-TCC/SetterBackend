@@ -19,7 +19,6 @@ def create_tecnico(db: Session, tecnico: TreinadorSchema):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -29,7 +28,6 @@ def get_all_tecnicos(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -39,7 +37,6 @@ def get_tecnico_by_id(db: Session, id_tecnico: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -51,7 +48,6 @@ def update_tecnico(db: Session, id_tecnico: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -62,5 +58,4 @@ def delete_tecnico(db: Session, id_tecnico: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False
