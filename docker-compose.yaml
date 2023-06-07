@@ -9,6 +9,20 @@ networks:
           gateway: 10.5.0.1
 
 services:
+  setter-back:
+    container_name: setter-back
+    build: .
+    command: [ "./scripts/start.sh" ]
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app/
+    depends_on:
+      - postgres
+    networks:
+      setter-db-net:
+        ipv4_address: 10.5.0.5
+
   postgres:
     container_name: setter-postgres
     image: postgres:13
@@ -23,20 +37,6 @@ services:
     networks:
       setter-db-net:
         ipv4_address: 10.5.0.6
-
-  setter-back:
-    container_name: setter-back
-    build: .
-    command: [ "./scripts/start.sh" ]
-    ports:
-      - '8000:8000'
-    volumes:
-      - .:/app/
-    depends_on:
-      - postgres
-    networks:
-      setter-db-net:
-        ipv4_address: 10.5.0.5
 
   pgadmin:
     container_name: setter-pgadmin
