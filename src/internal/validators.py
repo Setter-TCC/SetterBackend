@@ -4,7 +4,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from src.configs.depends import get_db
+from src.configs.database import get_db
 from src.repositories import admin_repository, integracao_repository
 from src.utils.enums import TipoPessoa
 from src.utils.jwt import verify_token
