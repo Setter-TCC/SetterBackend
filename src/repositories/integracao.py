@@ -44,6 +44,18 @@ def get_integracao_by_id(db: Session, integracao_id: UUID):
         return False
 
 
+def get_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_ID: UUID):
+    try:
+        query = db.query(IntegracaoIntegra) \
+            .filter_by(time_id=team_ID, pessoa_id=user_id) \
+            .first()
+        return query
+
+    except Exception:
+        db.rollback()
+        return False
+
+
 def get_integracoes_by_time_id(db: Session, time_id: UUID):
     try:
         query = db.query(IntegracaoIntegra).filter(IntegracaoIntegra.time_id == time_id).all()
