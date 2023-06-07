@@ -3,6 +3,7 @@ from fastapi import FastAPI, APIRouter
 from src.configs.environment import get_environment_variables
 from src.routers.account import account_router
 from src.routers.team import team_router
+from src.routers.token import token_router
 
 env = get_environment_variables()
 
@@ -24,3 +25,4 @@ def init_routes(app: FastAPI):
     app.include_router(health_check_router, prefix=BASE_PATH)
     app.include_router(account_router, prefix=BASE_PATH)
     app.include_router(team_router, prefix=BASE_PATH)
+    app.include_router(token_router, prefix=BASE_PATH)
