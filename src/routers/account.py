@@ -61,7 +61,6 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
 
     admin_person_ok = pessoa_repository.create_pessoa(db=db, pessoa=admin_person)
     if not admin_person_ok:
-        db.rollback()
         time_repository.delete_time(db=db, time_id=team.id)
         return JSONResponse(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -72,7 +71,6 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
 
     admin_ok = admin_repository.create_admin(db=db, admin=admin)
     if not admin_ok:
-        db.rollback()
         time_repository.delete_time(db=db, time_id=team.id)
         pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
         return JSONResponse(
@@ -84,7 +82,6 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
 
     admin_integration_ok = integracao_repository.create_integracao(db=db, integracao=admin_integration)
     if not admin_integration_ok:
-        db.rollback()
         time_repository.delete_time(db=db, time_id=team.id)
         pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
         admin_repository.delete_admin(db=db, admin_id=admin.id)
