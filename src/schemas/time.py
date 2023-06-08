@@ -28,10 +28,3 @@ class TimeSchema(BaseModel):
                              "1-feminino   "
                              "2-masculino   "
                              "3-misto")
-
-
-class TimeRequest(BaseModel):
-    id: UUID
-
-    class Config:
-        orm_mode = True
