@@ -9,13 +9,12 @@ from src.configs.database import get_db
 from src.internal.team import generate_payload_for_athlete_create
 from src.internal.validators import validate_user_authorization, token_validator
 from src.repositories import integracao_repository, pessoa_repository, atleta_repository
-from src.routers.team import team_router
 from src.schemas import AtletaRequest, ActivationRequest, PessoaSchema, AtletaSchema
 
-athlete_router = APIRouter(prefix="/team", dependencies=[Depends(token_validator)])
+athlete_router = APIRouter(prefix="/athlete", dependencies=[Depends(token_validator)])
 
 
-@team_router.post("/athlete", tags=["Atletas"])
+@athlete_router.post("/create", tags=["Atletas"])
 async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
                          token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
@@ -61,7 +60,7 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
     )
 
 
-@team_router.get("/athletes", tags=["Atletas"])
+@athlete_router.get("/", tags=["Atletas"])
 async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
                                 token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
@@ -88,7 +87,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
     )
 
 
-@team_router.post("/athlete/deactivate", tags=["Atletas"])
+@athlete_router.post("/deactivate", tags=["Atletas"])
 async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
                              token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
@@ -118,7 +117,7 @@ async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(g
     )
 
 
-@team_router.post("/athlete/activate", tags=["Atletas"])
+@athlete_router.post("/activate", tags=["Atletas"])
 async def activate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
                            token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
@@ -148,7 +147,7 @@ async def activate_athlete(request: ActivationRequest, db: Session = Depends(get
     )
 
 
-@team_router.patch("/athlete", tags=["Atletas"])
+@athlete_router.patch("/update", tags=["Atletas"])
 async def update_athlete(request: AtletaRequest, db: Session = Depends(get_db), token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
