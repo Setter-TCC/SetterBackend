@@ -136,10 +136,11 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
                 "team": "Team created succesfully.",
                 "coach": coach_msg
             },
-            "token": {
+            "auth": {
                 "token": token.get("token"),
                 "refresh": token.get("refresh"),
-                "expire": token.get("exp")
+                "expire": datetime.fromtimestamp(token.get("exp")).strftime("%Y-%m-%dT%H:%M:%S"),
+                "team_id": str(team.id)
             }
         }
     )
@@ -162,6 +163,13 @@ async def user_login(request: OAuth2PasswordRequestForm = Depends(), db: Session
             detail="Invalid username or password."
         )
 
+    integracao = integracao_repository.get_admin_integracao_by_pessoa_id(db=db, pessoa_id=admin_on_db.id)
+    if not integracao:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not linked to a valid team."
+        )
+
     token_payload = generate_payload(admin_on_db.nome_usuario)
     token = generate_token(token_payload)
 
@@ -169,10 +177,11 @@ async def user_login(request: OAuth2PasswordRequestForm = Depends(), db: Session
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Logged in succesfully",
-            "token": {
+            "auth": {
                 "token": token.get("token"),
                 "refresh": token.get("refresh"),
-                "expire": token.get("exp")
+                "expire": datetime.fromtimestamp(token.get("exp")).strftime("%Y-%m-%dT%H:%M:%S"),
+                "team_id": str(integracao.time_id)
             }
         }
     )
