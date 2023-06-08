@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import validator
 
 from src.schemas.pessoa import PessoaSchema
@@ -20,3 +22,7 @@ class AtletaSchema(PessoaSchema):
                              "3-central   "
                              "4-libero   "
                              "5-oposta")
+
+
+class AtletaRequest(AtletaSchema):
+    time_id: UUID

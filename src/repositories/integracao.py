@@ -23,7 +23,6 @@ def create_integracao(db: Session, integracao: IntegracaoIntegraSchema):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -33,7 +32,6 @@ def get_integracoes(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -43,7 +41,17 @@ def get_integracao_by_id(db: Session, integracao_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
+        return False
+
+
+def get_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_ID: UUID):
+    try:
+        query = db.query(IntegracaoIntegra) \
+            .filter_by(time_id=team_ID, pessoa_id=user_id) \
+            .first()
+        return query
+
+    except Exception:
         return False
 
 
@@ -53,7 +61,6 @@ def get_integracoes_by_time_id(db: Session, time_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -63,5 +70,4 @@ def get_integracoes_by_pessoa_id(db: Session, pessoa_id: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False

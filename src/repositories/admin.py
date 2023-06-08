@@ -20,7 +20,6 @@ def create_admin(db: Session, admin: AdministradorSchema):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -30,7 +29,6 @@ def get_all_admins(db: Session, skip: int = 0, limit: int = 100):
         return query
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -40,8 +38,16 @@ def get_admin_by_id(db: Session, id_admin: UUID):
         return query
 
     except Exception:
-        db.rollback()
         return False
+
+
+def get_admin_by_nome_usuario(db: Session, nome_usuario: str):
+    try:
+        query = db.query(Administrador).filter_by(nome_usuario=nome_usuario).first()
+        return query
+
+    except Exception:
+        return None
 
 
 def update_admin(db: Session, id_admin: UUID):
@@ -52,7 +58,6 @@ def update_admin(db: Session, id_admin: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False
 
 
@@ -63,5 +68,4 @@ def delete_admin(db: Session, admin_id: UUID):
         return True
 
     except Exception:
-        db.rollback()
         return False

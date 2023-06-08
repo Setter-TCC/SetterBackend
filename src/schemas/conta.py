@@ -14,3 +14,11 @@ class ContaRequest(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class LoginSchema(BaseModel):
+    nome_usuario: str
+    senha: str
+
+    class Config:
+        orm_mode = True
