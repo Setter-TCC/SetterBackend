@@ -79,7 +79,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
                     "cpf": atleta.Pessoa.cpf,
                     "rg": atleta.Pessoa.rg,
                     "telefone": atleta.Pessoa.telefone,
-                    "posicao": atleta.Atleta.posicao.name,
+                    "posicao": atleta.Atleta.posicao.value,
                     "ativo": atleta.IntegracaoIntegra.ativo
                 } for atleta in atletas
             ]
