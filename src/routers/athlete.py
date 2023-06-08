@@ -60,7 +60,7 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
     )
 
 
-@athlete_router.get("/", tags=["Atletas"])
+@athlete_router.get("", tags=["Atletas"])
 async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
                                 token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
@@ -72,7 +72,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
             "msg": "Success fetching all athletes.",
             "value": [
                 {
-                    "id": str(atleta.Pessoa.team_id),
+                    "id": str(atleta.Pessoa.id),
                     "nome": atleta.Pessoa.nome,
                     "email": atleta.Pessoa.email,
                     "data_nascimento": atleta.Pessoa.data_nascimento.strftime("%d/%m/%Y"),
@@ -100,7 +100,7 @@ async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(g
             detail="Link between athlete and team not found."
         )
 
-    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.team_id,
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.time_id,
                                                                      active=False)
     if not update_ok:
         db.rollback()
@@ -130,7 +130,7 @@ async def activate_athlete(request: ActivationRequest, db: Session = Depends(get
             detail="Link between athlete and team not found."
         )
 
-    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.team_id,
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.time_id,
                                                                      active=True)
     if not update_ok:
         db.rollback()
