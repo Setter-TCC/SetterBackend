@@ -44,10 +44,10 @@ def get_integracao_by_id(db: Session, integracao_id: UUID):
         return False
 
 
-def get_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_ID: UUID):
+def get_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_id: UUID):
     try:
         query = db.query(IntegracaoIntegra) \
-            .filter_by(time_id=team_ID, pessoa_id=user_id) \
+            .filter_by(time_id=team_id, pessoa_id=user_id) \
             .first()
         return query
 
@@ -67,6 +67,16 @@ def get_integracoes_by_time_id(db: Session, time_id: UUID):
 def get_integracoes_by_pessoa_id(db: Session, pessoa_id: UUID):
     try:
         query = db.query(IntegracaoIntegra).filter(IntegracaoIntegra.pessoa_id == pessoa_id).all()
+        return query
+
+    except Exception:
+        return False
+
+
+def update_integracao_active_state(db: Session, integration_id: UUID, active: bool):
+    try:
+        query = db.query(IntegracaoIntegra).filter_by(id=integration_id).update({"ativo": active})
+        db.commit()
         return query
 
     except Exception:

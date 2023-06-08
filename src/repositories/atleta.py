@@ -2,9 +2,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from src.models import Atleta
+from src.models import Atleta, Pessoa, IntegracaoIntegra
 from src.schemas.atleta import AtletaSchema
-from src.utils.enums import PosicaoAtleta
+from src.utils.enums import PosicaoAtleta, TipoPessoa
 
 
 def create_atleta(db: Session, atleta: AtletaSchema):
@@ -41,12 +41,31 @@ def get_atleta_by_id(db: Session, id_atleta: UUID):
         return False
 
 
-def update_atleta(db: Session, id_atleta: UUID):
+def get_atletas_time(db: Session, id_time: UUID):
     try:
-        query = db.query(Atleta).filter(Atleta.id == id_atleta)
-        # atualizar para cada campo enviado
+        query = db.query(Pessoa, Atleta, IntegracaoIntegra) \
+            .join(Atleta, Pessoa.id == Atleta.id) \
+            .join(IntegracaoIntegra, Pessoa.id == IntegracaoIntegra.pessoa_id) \
+            .filter(IntegracaoIntegra.tipo_pessoa == TipoPessoa.atleta) \
+            .order_by(IntegracaoIntegra.ativo.desc(), Pessoa.nome.asc()) \
+            .all()
+        return query
+
+    except Exception:
+        return False
+
+
+def update_atleta(db: Session, atleta: AtletaSchema):
+    try:
+        _atleta = Atleta(
+            id=atleta.id,
+            posicao=PosicaoAtleta(atleta.posicao)
+        )
+        query = db.query(Atleta).filter_by(id=_atleta.id).update({
+            "posicao": _atleta.posicao
+        })
         db.commit()
-        return True
+        return query
 
     except Exception:
         return False
