@@ -100,7 +100,7 @@ async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(g
             detail="Link between athlete and team not found."
         )
 
-    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.time_id,
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.id,
                                                                      active=False)
     if not update_ok:
         db.rollback()
@@ -130,7 +130,7 @@ async def activate_athlete(request: ActivationRequest, db: Session = Depends(get
             detail="Link between athlete and team not found."
         )
 
-    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.time_id,
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.id,
                                                                      active=True)
     if not update_ok:
         db.rollback()
