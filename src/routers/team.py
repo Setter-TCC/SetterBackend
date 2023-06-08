@@ -7,13 +7,13 @@ from sqlalchemy.orm import Session
 from src.configs.database import get_db
 from src.internal.team import generate_payload_for_athlete_create
 from src.internal.validators import validate_user_authorization, token_validator
-from src.repositories import admin_repository, integracao_repository, pessoa_repository, atleta_repository
-from src.schemas import AtletaRequest
+from src.repositories import integracao_repository, pessoa_repository, atleta_repository
+from src.schemas import AtletaRequest, ActivationRequest, PessoaSchema, AtletaSchema, TimeRequest
 
 team_router = APIRouter(prefix="/team", dependencies=[Depends(token_validator)])
 
 
-@team_router.post("/athletes", tags=["Atletas", "Time"])
+@team_router.post("/athlete", tags=["Atletas", "Time"])
 async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
                          token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
@@ -60,19 +60,26 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
 
 
 @team_router.get("/athletes", tags=["Atletas", "Time"])
-async def get_all_atletas(db: Session = Depends(get_db)):
-    # atletas = atleta_repository.get_all_atletas(db=db)
-    admins = admin_repository.get_all_admins(db=db)
+async def get_atletas_from_time(request: TimeRequest, db: Session = Depends(get_db), token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, request.id, token)
+
+    atletas = atleta_repository.get_atletas_time(db=db, id_time=request.id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Success fetching all athletes.",
             "value": [
                 {
-                    "nome": atleta.pessoa.nome,
-                    "email": atleta.pessoa.email,
-                    "nome_usuario": atleta.nome_usuario
-                } for atleta in admins
+                    "id": str(atleta.Pessoa.id),
+                    "nome": atleta.Pessoa.nome,
+                    "email": atleta.Pessoa.email,
+                    "data_nascimento": atleta.Pessoa.data_nascimento.strftime("%d/%m/%Y"),
+                    "cpf": atleta.Pessoa.cpf,
+                    "rg": atleta.Pessoa.rg,
+                    "telefone": atleta.Pessoa.telefone,
+                    "posicao": atleta.Atleta.posicao.name,
+                    "ativo": atleta.IntegracaoIntegra.ativo
+                } for atleta in atletas
             ]
         }
     )
