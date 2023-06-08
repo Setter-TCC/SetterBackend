@@ -84,9 +84,9 @@ def get_admin_integracao_by_pessoa_id(db: Session, pessoa_id: UUID):
 
 def update_integracao_active_state(db: Session, integration_id: UUID, active: bool):
     try:
-        query = db.query(IntegracaoIntegra).filter_by(id=integration_id).update({"ativo": active})
+        db.query(IntegracaoIntegra).filter_by(id=integration_id).update({"ativo": active})
         db.commit()
-        return query
+        return True
 
     except Exception:
         return False
