@@ -83,3 +83,94 @@ async def get_atletas_from_time(request: TimeRequest, db: Session = Depends(get_
             ]
         }
     )
+
+
+@team_router.post("/athlete/deactivate", tags=["Atletas", "Time"])
+async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
+                             token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, request.time_id, token)
+
+    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                          team_id=request.time_id)
+    if not integracao:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Link between athlete and team not found."
+        )
+
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.id, active=False)
+    if not update_ok:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            detail="Could not deactivate the athlete."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Deactivated athlete succesfully"
+        }
+    )
+
+
+@team_router.post("/athlete/activate", tags=["Atletas", "Time"])
+async def activate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
+                           token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, request.time_id, token)
+
+    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                          team_id=request.time_id)
+    if not integracao:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Link between athlete and team not found."
+        )
+
+    update_ok = integracao_repository.update_integracao_active_state(db=db, integration_id=integracao.id, active=True)
+    if not update_ok:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            detail="Could not activate the athlete."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Activated athlete succesfully"
+        }
+    )
+
+
+@team_router.patch("/athlete", tags=["Atletas", "Time"])
+async def update_athlete(request: AtletaRequest, db: Session = Depends(get_db), token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, request.time_id, token)
+
+    pessoa = PessoaSchema(id=request.id, nome=request.nome, email=request.email, cpf=request.cpf, rg=request.rg,
+                          data_nascimento=request.data_nascimento, telefone=request.telefone)
+    atleta = AtletaSchema(id=request.id, nome=request.nome, email=request.email, cpf=request.cpf, rg=request.rg,
+                          data_nascimento=request.data_nascimento, telefone=request.telefone, posicao=request.posicao)
+
+    pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
+    if not pessoa_ok:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            detail="Could not update personal data from the athlete."
+        )
+
+    atleta_ok = atleta_repository.update_atleta(db=db, atleta=atleta)
+    if not atleta_ok:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            detail="Could not update sport data from the athlete."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Updated athlete succesfully."
+        }
+    )
