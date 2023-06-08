@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -42,11 +42,9 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
     team_ok = time_repository.create_time(db=db, time=team)
     if not team_ok:
         db.rollback()
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            content={
-                "msg": "Unable to create entity for team on database"
-            }
+            detail="Unable to create entity for team on database"
         )
 
     # Admin manipulation
@@ -64,11 +62,9 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
     if not admin_person_ok:
         db.rollback()
         time_repository.delete_time(db=db, time_id=team.id)
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            content={
-                "msg": "Unable to create entity for admin person on database"
-            }
+            detail="Unable to create entity for admin person on database"
         )
 
     admin_ok = admin_repository.create_admin(db=db, admin=admin)
@@ -76,11 +72,9 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
         db.rollback()
         time_repository.delete_time(db=db, time_id=team.id)
         pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            content={
-                "msg": "Unable to create entity for admin account on database"
-            }
+            detail="Unable to create entity for admin account on database"
         )
 
     admin_integration_ok = integracao_repository.create_integracao(db=db, integracao=admin_integration)
@@ -89,11 +83,9 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
         time_repository.delete_time(db=db, time_id=team.id)
         pessoa_repository.delete_pessoa(db=db, pessoa_id=admin_person.id)
         admin_repository.delete_admin(db=db, admin_id=admin.id)
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            content={
-                "msg": "Unable to link admin to team entities on database."
-            }
+            detail="Unable to link admin to team entities on database."
         )
 
     # Coach
@@ -159,19 +151,15 @@ async def user_login(request: OAuth2PasswordRequestForm = Depends(), db: Session
     admin_on_db = admin_repository.get_admin_by_nome_usuario(db=db, nome_usuario=admin_login.nome_usuario)
 
     if admin_on_db is None:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={
-                "msg": "Invalid username or password."
-            }
+            detail="Invalid username or password."
         )
 
     if not crypt_context.verify(admin_login.senha, admin_on_db.senha):
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={
-                "msg": "Invalid username or password."
-            }
+            detail="Invalid username or password."
         )
 
     token_payload = generate_payload(admin_on_db.nome_usuario)
