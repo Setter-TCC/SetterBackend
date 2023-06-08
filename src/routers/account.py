@@ -146,6 +146,7 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
             },
             "token": {
                 "token": token.get("token"),
+                "refresh": token.get("refresh"),
                 "expire": token.get("exp")
             }
         }
@@ -182,6 +183,7 @@ async def user_login(request: OAuth2PasswordRequestForm = Depends(), db: Session
             "msg": "Logged in succesfully",
             "token": {
                 "token": token.get("token"),
+                "refresh": token.get("refresh"),
                 "expire": token.get("exp")
             }
         }

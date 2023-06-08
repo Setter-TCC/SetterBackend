@@ -25,8 +25,13 @@ def generate_token(payload: Dict[str, Union[str, datetime]]):
 
     access_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
+    payload["exp"] = datetime.utcnow() + timedelta(hours=2)
+
+    refresh_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
     return {
         "token": access_token,
+        "refresh": refresh_token,
         "exp": payload.get("exp")
     }
 
