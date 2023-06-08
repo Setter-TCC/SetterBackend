@@ -147,7 +147,7 @@ async def activate_athlete(request: ActivationRequest, db: Session = Depends(get
     )
 
 
-@athlete_router.patch("/update", tags=["Atletas"])
+@athlete_router.put("/update", tags=["Atletas"])
 async def update_athlete(request: AtletaRequest, db: Session = Depends(get_db), token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
