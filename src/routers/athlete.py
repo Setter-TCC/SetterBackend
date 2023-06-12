@@ -65,7 +65,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
                                 token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
 
-    atletas = atleta_repository.get_atletas_time(db=db, id_time=team_id)
+    atletas = atleta_repository.get_atletas_time(db=db, time_id=team_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={

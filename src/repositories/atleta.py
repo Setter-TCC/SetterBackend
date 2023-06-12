@@ -41,12 +41,12 @@ def get_atleta_by_id(db: Session, id_atleta: UUID):
         return False
 
 
-def get_atletas_time(db: Session, id_time: UUID):
+def get_atletas_time(db: Session, time_id: UUID):
     try:
         query = db.query(Pessoa, Atleta, IntegracaoIntegra) \
             .join(Atleta, Pessoa.id == Atleta.id) \
             .join(IntegracaoIntegra, Pessoa.id == IntegracaoIntegra.pessoa_id) \
-            .filter(IntegracaoIntegra.tipo_pessoa == TipoPessoa.atleta) \
+            .filter(IntegracaoIntegra.tipo_pessoa == TipoPessoa.atleta, IntegracaoIntegra.time_id == time_id) \
             .order_by(IntegracaoIntegra.ativo.desc(), Pessoa.nome.asc()) \
             .all()
         return query
