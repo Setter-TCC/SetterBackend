@@ -6,10 +6,10 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from src.configs.database import get_db
-from src.internal.team import generate_payload_for_athlete_create
+from src.internal.athlete import generate_payload_for_athlete_create
 from src.internal.validators import validate_user_authorization, token_validator
 from src.repositories import integracao_repository, pessoa_repository, atleta_repository
-from src.schemas import AtletaRequest, ActivationRequest, PessoaSchema, AtletaSchema
+from src.schemas import AtletaRequest, AtletaActivationRequest, PessoaSchema, AtletaSchema
 
 athlete_router = APIRouter(prefix="/athlete", dependencies=[Depends(token_validator)])
 
@@ -88,7 +88,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
 
 
 @athlete_router.post("/deactivate", tags=["Atletas"])
-async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
+async def deactivate_athlete(request: AtletaActivationRequest, db: Session = Depends(get_db),
                              token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
@@ -118,7 +118,7 @@ async def deactivate_athlete(request: ActivationRequest, db: Session = Depends(g
 
 
 @athlete_router.post("/activate", tags=["Atletas"])
-async def activate_athlete(request: ActivationRequest, db: Session = Depends(get_db),
+async def activate_athlete(request: AtletaActivationRequest, db: Session = Depends(get_db),
                            token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
