@@ -3,5 +3,5 @@ from src.schemas.atleta import AtletaSchema, AtletaRequest, AtletaActivationRequ
 from src.schemas.conta import ContaRequest, LoginSchema
 from src.schemas.integracao import IntegracaoIntegraSchema
 from src.schemas.pessoa import PessoaSchema
-from src.schemas.tecnico import TreinadorSchema
+from src.schemas.tecnico import TreinadorSchema, TreinadorRequest, TecnicoActivationRequest, EditTreinadorRequest
 from src.schemas.time import TimeSchema
