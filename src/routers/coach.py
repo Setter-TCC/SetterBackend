@@ -63,7 +63,7 @@ async def create_coach(request: TreinadorRequest, db: Session = Depends(get_db),
         content={
             "msg": "Created coach successfully",
             "fields": {
-                "athlete": "Coach created successfully.",
+                "coach": "Coach created successfully.",
             },
         }
     )
@@ -151,9 +151,7 @@ async def update_coach(request: EditTreinadorRequest, db: Session = Depends(get_
         if integracao_tecnico.data_fim > integracao_tecnico.data_inicio:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "msg": "End date must be grather than start date."
-                }
+                detail="End date must be grather than start date."
             )
 
     pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
