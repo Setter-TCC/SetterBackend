@@ -39,12 +39,15 @@ def get_time_by_id(db: Session, time_id: UUID):
         return False
 
 
-def update_time(db: Session, time_id: UUID):
+def update_time(db: Session, time: TimeSchema):
     try:
-        query = db.query(Time).Filter(Time.id == time_id)
-        # Update da query pra cada campo passado
+        query = db.query(Time).filter_by(id=time.id).update({
+            "nome": time.nome,
+            "naipe": time.naipe,
+            "cnpj": time.cnpj
+        })
         db.commit()
-        return True
+        return query
 
     except Exception:
         return False
