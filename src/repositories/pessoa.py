@@ -48,10 +48,15 @@ def get_pessoa_by_email(db: Session, pessoa_email: EmailStr):
         return False
 
 
-def update_pessoa(db: Session, pessoa_id: UUID):
+def update_pessoa(db: Session, pessoa: PessoaSchema):
     try:
-        query = db.query(Pessoa).filter(Pessoa.id == pessoa_id)
-        # Update pra cada atributo passado
+        query = db.query(Pessoa).filter_by(id=pessoa.id).update({
+            "nome": pessoa.nome,
+            "cpf": pessoa.cpf,
+            "rg": pessoa.rg,
+            "data_nascimento": pessoa.data_nascimento,
+            "telefone": pessoa.telefone
+        })
         db.commit()
         return query
 

@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from pydantic import BaseModel
 from pydantic import validator
 
 from src.schemas.pessoa import PessoaSchema
@@ -26,3 +27,11 @@ class AtletaSchema(PessoaSchema):
 
 class AtletaRequest(AtletaSchema):
     time_id: UUID
+
+
+class ActivationRequest(BaseModel):
+    atleta_id: UUID
+    time_id: UUID
+
+    class Config:
+        orm_mode = True
