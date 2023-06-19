@@ -66,7 +66,7 @@ def update_pessoa(db: Session, pessoa: PessoaSchema):
 
 def delete_pessoa(db: Session, pessoa_id: UUID):
     try:
-        db.query(Pessoa).filter(Pessoa.id == pessoa_id).delete()
+        db.query(Pessoa).filter_by(id=pessoa_id).delete()
         db.commit()
         return True
 
