@@ -99,7 +99,8 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
                     "id": str(coach.Pessoa.id),
                     "nome": coach.Pessoa.nome,
                     "email": coach.Pessoa.email,
-                    "data_nascimento": coach.Pessoa.data_nascimento.strftime("%d/%m/%Y"),
+                    "data_nascimento": coach.Pessoa.data_nascimento.strftime(
+                        "%d/%m/%Y") if coach.Pessoa.data_nascimento else None,
                     "cpf": coach.Pessoa.cpf,
                     "rg": coach.Pessoa.rg,
                     "telefone": coach.Pessoa.telefone,
