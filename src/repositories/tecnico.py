@@ -59,7 +59,7 @@ def get_tecnico_by_id(db: Session, id_tecnico: UUID):
 
 def update_tecnico(db: Session, tecnico: TreinadorSchema):
     try:
-        query = db.query(Pessoa).filter_by(id=tecnico.id).update({
+        query = db.query(Treinador).filter_by(id=tecnico.id).update({
             "cref": tecnico.cref
         })
         db.commit()

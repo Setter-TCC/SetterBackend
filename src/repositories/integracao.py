@@ -83,6 +83,15 @@ def get_admin_integracao_by_pessoa_id(db: Session, pessoa_id: UUID):
         return False
 
 
+def get_tecnico_integracao_by_pessoa_id(db: Session, pessoa_id: UUID):
+    try:
+        query = db.query(IntegracaoIntegra).filter_by(pessoa_id=pessoa_id, tipo_pessoa=TipoPessoa.tecnico).first()
+        return query
+
+    except Exception:
+        return False
+
+
 def update_integracao(db: Session, integracao: IntegracaoIntegraSchema):
     try:
         query = db.query(IntegracaoIntegra).filter_by(id=integracao.id).update({

@@ -19,6 +19,15 @@ async def create_coach(request: TreinadorRequest, db: Session = Depends(get_db),
                        token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
+    active_coaches = tecnico_repository.get_coach_from_team(db=db, time_id=request.time_id)
+    if len(active_coaches) >= 1:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "msg": "This team already has a coach registered."
+            }
+        )
+
     request.id = uuid4()
     tecnico, integracao, pessoa_atleta = generate_payload_for_coach_create(request)
 
@@ -65,7 +74,7 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
                                      token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
 
-    coaches = tecnico_repository.get_all_tecnicos(db=db)
+    coaches = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
 
     if len(coaches) > 1:
         raise HTTPException(
@@ -94,8 +103,8 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
                     "cpf": coach.Pessoa.cpf,
                     "rg": coach.Pessoa.rg,
                     "telefone": coach.Pessoa.telefone,
-                    "cref": coach.Atleta.posicao.value,
-                    "data_inicio": coach.IntegracaoIntegra.data_inicio
+                    "cref": coach.Treinador.cref,
+                    "data_inicio": coach.IntegracaoIntegra.data_inicio.strftime("%d/%m/%Y")
                 } for coach in coaches
             ]
         }
@@ -136,7 +145,16 @@ async def update_coach(request: EditTreinadorRequest, db: Session = Depends(get_
                        token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    tecnico, integracao_tecnico, pessoa = generate_payload_for_coach_update(request)
+    tecnico, pessoa, integracao_tecnico = generate_payload_for_coach_update(db=db, request=request)
+
+    if integracao_tecnico.data_fim is not None:
+        if integracao_tecnico.data_fim > integracao_tecnico.data_inicio:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "msg": "End date must be grather than start date."
+                }
+            )
 
     pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
     if not pessoa_ok:
@@ -154,7 +172,7 @@ async def update_coach(request: EditTreinadorRequest, db: Session = Depends(get_
             detail="Could not update sport data from the coach."
         )
 
-    integracao_ok = integracao_repository.update_integracao_active_state(db=db, active=True)
+    integracao_ok = integracao_repository.update_integracao(db=db, integracao=integracao_tecnico)
     if not integracao_ok:
         db.rollback()
         raise HTTPException(
