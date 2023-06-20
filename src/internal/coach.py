@@ -31,7 +31,7 @@ def generate_payload_for_coach_create(request: TreinadorRequest) \
     )
     integracao = IntegracaoIntegraSchema(
         id=uuid4(),
-        data_inicio=request.data_entrada,
+        data_inicio=request.data_inicio,
         ativo=True,
         tipo_pessoa=TipoPessoa.tecnico.value,
         time_id=request.time_id,
@@ -65,7 +65,7 @@ def generate_payload_for_coach_update(db: Session, request: EditTreinadorRequest
     _integracao = integracao_repository.get_tecnico_integracao_by_pessoa_id(db=db, pessoa_id=tecnico.id)
     integracao_tecnico = IntegracaoIntegraSchema(
         id=_integracao.id,
-        data_inicio=request.data_entrada,
+        data_inicio=request.data_inicio,
         data_fim=request.data_fim,
         ativo=False if request.data_fim is not None else True,
         tipo_pessoa=TipoPessoa.tecnico.value,

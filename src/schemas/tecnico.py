@@ -13,7 +13,7 @@ class TreinadorSchema(PessoaSchema):
 
 class TreinadorRequest(TreinadorSchema):
     time_id: UUID
-    data_entrada: datetime
+    data_inicio: datetime
 
 
 class EditTreinadorRequest(TreinadorRequest):
