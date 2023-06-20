@@ -74,21 +74,23 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
                                      token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
 
-    coach = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
+    coaches = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
 
-    if len(coach) > 1:
+    if len(coaches) > 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This team has more than 1 active coach."
         )
 
-    if len(coach) < 1:
+    if len(coaches) < 1:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={
                 "detal": "This team has no coaches."
             }
         )
+
+    coach = coaches[0]
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
