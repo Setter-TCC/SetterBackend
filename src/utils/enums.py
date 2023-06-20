@@ -19,3 +19,9 @@ class NaipeTime(enum.Enum):
     feminino = 1
     masculino = 2
     misto = 3
+
+
+class TipoTransacao(enum.Enum):
+    mensalidade = 1
+    despesa = 2
+    ganho = 3

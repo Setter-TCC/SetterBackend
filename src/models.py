@@ -1,11 +1,11 @@
 from uuid import uuid4
 
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Boolean, UniqueConstraint
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Boolean, UniqueConstraint, Float
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.utils.enums import PosicaoAtleta, NaipeTime, TipoPessoa
+from src.utils.enums import PosicaoAtleta, NaipeTime, TipoPessoa, TipoTransacao
 
 Base = declarative_base()
 
@@ -76,3 +76,17 @@ class IntegracaoIntegra(Base):
 
     __table_args__ = (UniqueConstraint('time_id', 'pessoa_id', 'tipo_pessoa', name='_time_pessoa_tipo_uc'),
                       )
+
+
+class TransacaoTransaciona(Base):
+    __tablename__ = "transacao_transaciona"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    data_acontecimento = Column(DateTime, nullable=False)
+    tipo = Column(Enum(TipoTransacao), nullable=False)
+    valor = Column(Float, nullable=False)
+    time_id = Column(UUID(as_uuid=True), ForeignKey("time.id"))
+    pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"))
+
+    time = relationship("Time")
+    pessoa = relationship("Pessoa")
