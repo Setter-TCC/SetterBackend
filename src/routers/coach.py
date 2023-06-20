@@ -74,15 +74,15 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
                                      token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
 
-    coaches = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
+    coach = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
 
-    if len(coaches) > 1:
+    if len(coach) > 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This team has more than 1 active coach."
         )
 
-    if len(coaches) < 1:
+    if len(coach) < 1:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={
@@ -94,20 +94,18 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Success fetching coach.",
-            "value": [
-                {
-                    "id": str(coach.Pessoa.id),
-                    "nome": coach.Pessoa.nome,
-                    "email": coach.Pessoa.email,
-                    "data_nascimento": coach.Pessoa.data_nascimento.strftime(
-                        "%d/%m/%Y") if coach.Pessoa.data_nascimento else None,
-                    "cpf": coach.Pessoa.cpf,
-                    "rg": coach.Pessoa.rg,
-                    "telefone": coach.Pessoa.telefone,
-                    "cref": coach.Treinador.cref,
-                    "data_inicio": coach.IntegracaoIntegra.data_inicio.strftime("%d/%m/%Y")
-                } for coach in coaches
-            ]
+            "value": {
+                "id": str(coach.Pessoa.id),
+                "nome": coach.Pessoa.nome,
+                "email": coach.Pessoa.email,
+                "data_nascimento": coach.Pessoa.data_nascimento.strftime(
+                    "%d/%m/%Y") if coach.Pessoa.data_nascimento else None,
+                "cpf": coach.Pessoa.cpf,
+                "rg": coach.Pessoa.rg,
+                "telefone": coach.Pessoa.telefone,
+                "cref": coach.Treinador.cref,
+                "data_inicio": coach.IntegracaoIntegra.data_inicio.strftime("%d/%m/%Y")
+            }
         }
     )
 

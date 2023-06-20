@@ -41,7 +41,7 @@ def get_coach_from_team(db: Session, time_id: UUID):
             IntegracaoIntegra.tipo_pessoa == TipoPessoa.tecnico,
             IntegracaoIntegra.time_id == time_id,
             IntegracaoIntegra.ativo == True
-        ).all()
+        ).first()
         return query
 
     except Exception:
