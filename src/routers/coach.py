@@ -1,5 +1,7 @@
+from datetime import datetime
 from uuid import uuid4, UUID
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
@@ -125,7 +127,11 @@ async def deactivate_coach(request: TecnicoActivationRequest, db: Session = Depe
             detail="Link between coach and team not found."
         )
 
-    update_ok = integracao_repository.remove_from_team(db=db, integration_id=integracao.id)
+    update_ok = integracao_repository.remove_from_team(
+        db=db, integration_id=integracao.id,
+        data_fim=request.data_fim if request.data_fim is not None else datetime.now(
+            tz=pytz.timezone('America/Sao_Paulo'))
+    )
     if not update_ok:
         db.rollback()
         raise HTTPException(

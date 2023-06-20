@@ -23,6 +23,7 @@ class EditTreinadorRequest(TreinadorRequest):
 class TecnicoActivationRequest(BaseModel):
     tecnico_id: UUID
     time_id: UUID
+    data_fim: Optional[Union[datetime, None]]
 
     class Config:
         orm_mode = True
