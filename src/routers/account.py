@@ -106,7 +106,7 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
             if coach_ok:
                 coach_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None,
                                                             ativo=True, tipo_pessoa=TipoPessoa.tecnico.value,
-                                                            time_id=team.id, pessoa_id=admin.id)
+                                                            time_id=team.id, pessoa_id=coach.id)
                 coach_integration_ok = integracao_repository.create_integracao(db=db, integracao=coach_integration)
 
                 if not coach_integration_ok:

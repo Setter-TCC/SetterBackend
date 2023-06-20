@@ -29,7 +29,7 @@ class AtletaRequest(AtletaSchema):
     time_id: UUID
 
 
-class ActivationRequest(BaseModel):
+class AtletaActivationRequest(BaseModel):
     atleta_id: UUID
     time_id: UUID
 

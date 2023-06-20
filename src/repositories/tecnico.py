@@ -2,8 +2,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from src.models import Treinador
+from src.models import Treinador, Pessoa, IntegracaoIntegra
 from src.schemas.tecnico import TreinadorSchema
+from src.utils.enums import TipoPessoa
 
 
 def create_tecnico(db: Session, tecnico: TreinadorSchema):
@@ -31,6 +32,22 @@ def get_all_tecnicos(db: Session, skip: int = 0, limit: int = 100):
         return False
 
 
+def get_coach_from_team(db: Session, time_id: UUID):
+    try:
+        query = db.query(Pessoa, Treinador, IntegracaoIntegra) \
+            .join(Treinador, Pessoa.id == Treinador.id) \
+            .join(IntegracaoIntegra, Pessoa.id == IntegracaoIntegra.pessoa_id) \
+            .filter(
+            IntegracaoIntegra.tipo_pessoa == TipoPessoa.tecnico,
+            IntegracaoIntegra.time_id == time_id,
+            IntegracaoIntegra.ativo == True
+        ).all()
+        return query
+
+    except Exception:
+        return False
+
+
 def get_tecnico_by_id(db: Session, id_tecnico: UUID):
     try:
         query = db.query(Treinador).filter(Treinador.id == id_tecnico).first()
@@ -40,10 +57,11 @@ def get_tecnico_by_id(db: Session, id_tecnico: UUID):
         return False
 
 
-def update_tecnico(db: Session, id_tecnico: UUID):
+def update_tecnico(db: Session, tecnico: TreinadorSchema):
     try:
-        query = db.query(Treinador).filter(Treinador.id == id_tecnico).first()
-        # atualizar para cada campo enviado
+        query = db.query(Treinador).filter_by(id=tecnico.id).update({
+            "cref": tecnico.cref
+        })
         db.commit()
         return query
 

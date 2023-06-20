@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -82,9 +83,45 @@ def get_admin_integracao_by_pessoa_id(db: Session, pessoa_id: UUID):
         return False
 
 
+def get_tecnico_integracao_by_pessoa_id(db: Session, pessoa_id: UUID):
+    try:
+        query = db.query(IntegracaoIntegra).filter_by(pessoa_id=pessoa_id, tipo_pessoa=TipoPessoa.tecnico).first()
+        return query
+
+    except Exception:
+        return False
+
+
+def update_integracao(db: Session, integracao: IntegracaoIntegraSchema):
+    try:
+        query = db.query(IntegracaoIntegra).filter_by(id=integracao.id).update({
+            "data_inicio": integracao.data_inicio,
+            "data_fim": integracao.data_fim,
+            "ativo": integracao.ativo
+        })
+        db.commit()
+        return query
+
+    except Exception:
+        return False
+
+
 def update_integracao_active_state(db: Session, integration_id: UUID, active: bool):
     try:
         query = db.query(IntegracaoIntegra).filter_by(id=integration_id).update({"ativo": active})
+        db.commit()
+        return query
+
+    except Exception:
+        return False
+
+
+def remove_from_team(db: Session, integration_id: UUID, data_fim: datetime):
+    try:
+        query = db.query(IntegracaoIntegra).filter_by(id=integration_id).update({
+            "ativo": False,
+            "data_fim": data_fim
+        })
         db.commit()
         return query
 
