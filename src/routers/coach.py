@@ -1,5 +1,7 @@
+from datetime import datetime
 from uuid import uuid4, UUID
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
@@ -90,23 +92,24 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
             }
         )
 
+    coach = coaches[0]
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Success fetching coach.",
-            "value": [
-                {
-                    "id": str(coach.Pessoa.id),
-                    "nome": coach.Pessoa.nome,
-                    "email": coach.Pessoa.email,
-                    "data_nascimento": coach.Pessoa.data_nascimento.strftime("%d/%m/%Y"),
-                    "cpf": coach.Pessoa.cpf,
-                    "rg": coach.Pessoa.rg,
-                    "telefone": coach.Pessoa.telefone,
-                    "cref": coach.Treinador.cref,
-                    "data_inicio": coach.IntegracaoIntegra.data_inicio.strftime("%d/%m/%Y")
-                } for coach in coaches
-            ]
+            "value": {
+                "id": str(coach.Pessoa.id),
+                "nome": coach.Pessoa.nome,
+                "email": coach.Pessoa.email,
+                "data_nascimento": coach.Pessoa.data_nascimento.strftime(
+                    "%d/%m/%Y") if coach.Pessoa.data_nascimento else None,
+                "cpf": coach.Pessoa.cpf,
+                "rg": coach.Pessoa.rg,
+                "telefone": coach.Pessoa.telefone,
+                "cref": coach.Treinador.cref,
+                "data_inicio": coach.IntegracaoIntegra.data_inicio.strftime("%d/%m/%Y")
+            }
         }
     )
 
@@ -124,7 +127,11 @@ async def deactivate_coach(request: TecnicoActivationRequest, db: Session = Depe
             detail="Link between coach and team not found."
         )
 
-    update_ok = integracao_repository.remove_from_team(db=db, integration_id=integracao.id)
+    update_ok = integracao_repository.remove_from_team(
+        db=db, integration_id=integracao.id,
+        data_fim=request.data_fim if request.data_fim is not None else datetime.now(
+            tz=pytz.timezone('America/Sao_Paulo'))
+    )
     if not update_ok:
         db.rollback()
         raise HTTPException(

@@ -116,11 +116,11 @@ def update_integracao_active_state(db: Session, integration_id: UUID, active: bo
         return False
 
 
-def remove_from_team(db: Session, integration_id: UUID):
+def remove_from_team(db: Session, integration_id: UUID, data_fim: datetime):
     try:
         query = db.query(IntegracaoIntegra).filter_by(id=integration_id).update({
             "ativo": False,
-            "data_fim": datetime.now()
+            "data_fim": data_fim
         })
         db.commit()
         return query
