@@ -34,7 +34,7 @@ def get_all_atletas(db: Session, skip: int = 0, limit: int = 100):
 
 def get_atleta_by_id(db: Session, id_atleta: UUID):
     try:
-        query = db.query(Atleta).filter(Atleta.id == id_atleta).first()
+        query = db.query(Atleta).filter_by(id=id_atleta).first()
         return query
 
     except Exception:
@@ -73,7 +73,7 @@ def update_atleta(db: Session, atleta: AtletaSchema):
 
 def delete_atleta(db: Session, id_atleta: UUID):
     try:
-        db.query(Atleta).filter(Atleta.id == id_atleta).delete()
+        db.query(Atleta).filter_by(id=id_atleta).delete()
         db.commit()
         return True
 

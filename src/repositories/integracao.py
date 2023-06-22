@@ -38,7 +38,7 @@ def get_integracoes(db: Session, skip: int = 0, limit: int = 100):
 
 def get_integracao_by_id(db: Session, integracao_id: UUID):
     try:
-        query = db.query(IntegracaoIntegra).filter(IntegracaoIntegra.id == integracao_id).first()
+        query = db.query(IntegracaoIntegra).filter_by(id=integracao_id).first()
         return query
 
     except Exception:

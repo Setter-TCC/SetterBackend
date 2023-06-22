@@ -1,4 +1,4 @@
-from src.schemas.administrador import AdministradorSchema
+from src.schemas.administrador import AdministradorSchema, AdministradorUpdate
 from src.schemas.atleta import AtletaSchema, AtletaRequest, AtletaActivationRequest
 from src.schemas.conta import ContaRequest, LoginSchema
 from src.schemas.integracao import IntegracaoIntegraSchema

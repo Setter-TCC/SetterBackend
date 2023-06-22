@@ -50,7 +50,7 @@ def get_coach_from_team(db: Session, time_id: UUID):
 
 def get_tecnico_by_id(db: Session, id_tecnico: UUID):
     try:
-        query = db.query(Treinador).filter(Treinador.id == id_tecnico).first()
+        query = db.query(Treinador).filter_by(id=id_tecnico).first()
         return query
 
     except Exception:
@@ -71,7 +71,7 @@ def update_tecnico(db: Session, tecnico: TreinadorSchema):
 
 def delete_tecnico(db: Session, id_tecnico: UUID):
     try:
-        db.query(Treinador).filter(Treinador.id == id_tecnico).delete()
+        db.query(Treinador).filter_by(id=id_tecnico).delete()
         db.commit()
         return True
 

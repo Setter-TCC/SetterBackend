@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
+import pytz
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -24,7 +25,7 @@ account_router = APIRouter(prefix="/account")
 
 
 @account_router.post("/register", tags=["Conta"])
-async def create_account(request: ContaRequest, db: Session = Depends(get_db)):  # TODO: Normalizar o datetime para utc
+async def create_account(request: ContaRequest, db: Session = Depends(get_db)):
     coach_sent: bool = request.treinador is not None
     coach_is_admin = request.administrador.email == request.treinador.email if coach_sent else False
 
@@ -54,9 +55,10 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
                                 telefone=request.administrador.telefone)
     admin = request.administrador
     admin.senha = crypt_context.hash(admin.senha)
-    admin_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None, ativo=True,
-                                                tipo_pessoa=TipoPessoa.administrador.value, time_id=team.id,
-                                                pessoa_id=admin.id)
+    admin_integration = IntegracaoIntegraSchema(id=uuid4(),
+                                                data_inicio=datetime.now(tz=pytz.timezone('America/Sao_Paulo')),
+                                                data_fim=None, ativo=True, time_id=team.id,
+                                                tipo_pessoa=TipoPessoa.administrador.value, pessoa_id=admin.id)
 
     admin_person_ok = pessoa_repository.create_pessoa(db=db, pessoa=admin_person)
     if not admin_person_ok:
@@ -104,7 +106,8 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)): 
         if should_create_coach:
             coach_ok = tecnico_repository.create_tecnico(db=db, tecnico=coach)
             if coach_ok:
-                coach_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(), data_fim=None,
+                coach_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(
+                    tz=pytz.timezone('America/Sao_Paulo')), data_fim=None,
                                                             ativo=True, tipo_pessoa=TipoPessoa.tecnico.value,
                                                             time_id=team.id, pessoa_id=coach.id)
                 coach_integration_ok = integracao_repository.create_integracao(db=db, integracao=coach_integration)

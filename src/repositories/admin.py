@@ -34,7 +34,7 @@ def get_all_admins(db: Session, skip: int = 0, limit: int = 100):
 
 def get_admin_by_id(db: Session, id_admin: UUID):
     try:
-        query = db.query(Administrador).filter(Administrador.id == id_admin).first()
+        query = db.query(Administrador).filter_by(id=id_admin).first()
         return query
 
     except Exception:
@@ -50,12 +50,13 @@ def get_admin_by_nome_usuario(db: Session, nome_usuario: str):
         return None
 
 
-def update_admin(db: Session, id_admin: UUID):
+def update_admin(db: Session, admin: AdministradorSchema):
     try:
-        query = db.query(Administrador).filter(Administrador.id == id_admin)
-        # atualizar para cada campo enviado
+        query = db.query(Administrador).filter_by(id=admin.id).update({
+            "senha": admin.senha
+        })
         db.commit()
-        return True
+        return query
 
     except Exception:
         return False
@@ -63,7 +64,7 @@ def update_admin(db: Session, id_admin: UUID):
 
 def delete_admin(db: Session, admin_id: UUID):
     try:
-        db.query(Administrador).filter(Administrador.id == admin_id).delete()
+        db.query(Administrador).filter_by(id=admin_id).delete()
         db.commit()
         return True
 

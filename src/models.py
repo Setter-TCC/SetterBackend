@@ -27,7 +27,7 @@ class Administrador(Base):
 
     id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"), primary_key=True, nullable=False, unique=True)
     nome_usuario = Column(String, nullable=False, unique=True)
-    senha = Column(String, nullable=False)  # TODO: Colocar unique
+    senha = Column(String, nullable=False)
 
     pessoa = relationship("Pessoa")
 

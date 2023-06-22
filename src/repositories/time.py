@@ -32,19 +32,22 @@ def get_times(db: Session, skip: int = 0, limit: int = 100):
 
 def get_time_by_id(db: Session, time_id: UUID):
     try:
-        query = db.query(Time).Filter(Time.id == time_id).first()
+        query = db.query(Time).filter_by(id=time_id).first()
         return query
 
     except Exception:
         return False
 
 
-def update_time(db: Session, time_id: UUID):
+def update_time(db: Session, time: TimeSchema):
     try:
-        query = db.query(Time).Filter(Time.id == time_id)
-        # Update da query pra cada campo passado
+        query = db.query(Time).filter_by(id=time.id).update({
+            "nome": time.nome,
+            "naipe": NaipeTime(time.naipe),
+            "cnpj": time.cnpj
+        })
         db.commit()
-        return True
+        return query
 
     except Exception:
         return False
@@ -52,7 +55,7 @@ def update_time(db: Session, time_id: UUID):
 
 def delete_time(db: Session, time_id: UUID):
     try:
-        db.query(Time).filter(Time.id == time_id).delete()
+        db.query(Time).filter_by(id=time_id).delete()
         db.commit()
         return True
 
