@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 
-from src.schemas.pessoa import PessoaSchema
-
 from pydantic import BaseModel, EmailStr
+
+from src.schemas.pessoa import PessoaSchema
 
 
 class AdministradorSchema(PessoaSchema):
@@ -18,7 +18,7 @@ class AdministradorUpdate(BaseModel):
     email: EmailStr
     cpf: Optional[str] = None
     rg: Optional[str] = None
-    data_nascimento: Optional[datetime] = None
+    data_nascimento: Optional[Union[datetime, None]] = None
     telefone: Optional[str] = None
     nome_usuario: str
     senha: Optional[str] = None
@@ -26,4 +26,3 @@ class AdministradorUpdate(BaseModel):
 
     class Config:
         orm_mode = True
-
