@@ -85,7 +85,7 @@ async def update_admin(request: AdministradorUpdate, db: Session = Depends(get_d
     admin = AdministradorSchema(
         id=request.id,
         nome_usuario=request.nome_usuario,
-        senha=request.nova_senha
+        senha=crypt_context.hash(request.nova_senha)
     )
 
     pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
