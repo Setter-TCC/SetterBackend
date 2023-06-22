@@ -5,3 +5,4 @@ from src.schemas.integracao import IntegracaoIntegraSchema
 from src.schemas.pessoa import PessoaSchema
 from src.schemas.tecnico import TreinadorSchema, TreinadorRequest, TecnicoActivationRequest, EditTreinadorRequest
 from src.schemas.time import TimeSchema
+from src.schemas.transacao import TransacaoSchema
