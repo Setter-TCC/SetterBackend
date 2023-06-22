@@ -72,7 +72,7 @@ async def get_team_data(team_id: UUID, db: Session = Depends(get_db), token: dic
                 "id": str(team.id),
                 "nome": team.nome,
                 "email": team.email,
-                "naipe": team.naipe.name,
+                "naipe": team.naipe.value,
                 "cnpj": team.cnpj
             }
         }
