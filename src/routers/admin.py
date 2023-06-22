@@ -30,7 +30,8 @@ async def get_admin_data(db: Session = Depends(get_db), token: dict = Depends(to
                 "id": str(admin.id),
                 "nome": admin.pessoa.nome,
                 "email": admin.pessoa.email,
-                "data_nascimento": admin.pessoa.data_nascimento.strftime("%d/%m/%Y"),
+                "data_nascimento": admin.pessoa.data_nascimento.strftime(
+                    "%d/%m/%Y") if admin.pessoa.data_nascimento else None,
                 "cpf": admin.pessoa.cpf,
                 "rg": admin.pessoa.rg,
                 "telefone": admin.pessoa.telefone,
