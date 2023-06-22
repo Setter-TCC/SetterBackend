@@ -1,5 +1,7 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
@@ -36,6 +38,48 @@ async def create_team_transaction(request: TransacaoSchema, db: Session = Depend
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Created transaction succesfully.",
+        }
+    )
+
+
+@transaction_router.get("/", tags=["Transação"])
+async def get_specific(transaction_id: UUID, db: Session = Depends(get_db),
+                                   token: dict = Depends(token_validator)):
+    transaction = transacao_repository.get_transacao_by_id(db=db, transacao_id=transaction_id)
+
+    if transaction:
+        await validate_user_authorization(db, transaction.time_id, token)
+
+    if not transaction:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Transaction not found."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Success fetching transaction.",
+            "value": {
+                "id": str(transaction.id),
+                "nome": transaction.nome,
+                "descricao": transaction.descricao,
+                "data_acontecimento": transaction.data_acontecimento.strftime("%d/%m/%Y"),
+                "tipo": transaction.tipo.value,
+                "valor": transaction.valor,
+                "origem": get_transaction_origin(
+                    team_name=transaction.time.nome,
+                    transaction_name=transaction.nome,
+                    person_name=transaction.pessoa.nome if transaction.pessoa else "",
+                    tipo_transacao=transaction.tipo
+                ),
+                "destino": get_transaction_destiny(
+                    team_name=transaction.time.nome,
+                    transaction_name=transaction.nome,
+                    person_name=transaction.pessoa.nome if transaction.pessoa else "",
+                    tipo_transacao=transaction.tipo
+                )
+            }
         }
     )
 
@@ -78,6 +122,64 @@ async def get_team_all_transaction(team_id: UUID, db: Session = Depends(get_db),
                         tipo_transacao=transaction.tipo
                     )
                 } for transaction in all_transactions
+            ]
+        }
+    )
+
+
+@transaction_router.get("/month", tags=["Transação"])
+async def get_team_all_transaction(team_id: UUID, month: int,
+                                   year: int = datetime.now(tz=pytz.timezone('America/Sao_Paulo')).year,
+                                   db: Session = Depends(get_db),
+                                   token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, team_id, token)
+
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enter a valid month"
+        )
+
+    if year > datetime.now(tz=pytz.timezone('America/Sao_Paulo')).year or year < 1895:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enter a valid year"
+        )
+
+    month_transactions = transacao_repository.get_time_transacoes_by_month(db=db, time_id=team_id,
+                                                                           month=month, year=year)
+
+    if len(month_transactions) == 0 or not month_transactions:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This team does not have transactions registered for this month."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Success fetching transactions.",
+            "value": [
+                {
+                    "id": str(transaction.id),
+                    "nome": transaction.nome,
+                    "descricao": transaction.descricao,
+                    "data_acontecimento": transaction.data_acontecimento.strftime("%d/%m/%Y"),
+                    "tipo": transaction.tipo.value,
+                    "valor": transaction.valor,
+                    "origem": get_transaction_origin(
+                        team_name=transaction.time.nome,
+                        transaction_name=transaction.nome,
+                        person_name=transaction.pessoa.nome if transaction.pessoa else "",
+                        tipo_transacao=transaction.tipo
+                    ),
+                    "destino": get_transaction_destiny(
+                        team_name=transaction.time.nome,
+                        transaction_name=transaction.nome,
+                        person_name=transaction.pessoa.nome if transaction.pessoa else "",
+                        tipo_transacao=transaction.tipo
+                    )
+                } for transaction in month_transactions
             ]
         }
     )
