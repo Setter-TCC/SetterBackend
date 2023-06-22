@@ -43,7 +43,7 @@ def update_time(db: Session, time: TimeSchema):
     try:
         query = db.query(Time).filter_by(id=time.id).update({
             "nome": time.nome,
-            "naipe": time.naipe,
+            "naipe": NaipeTime(time.naipe),
             "cnpj": time.cnpj
         })
         db.commit()
