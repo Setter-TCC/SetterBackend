@@ -13,7 +13,7 @@ class TreinadorSchema(PessoaSchema):
 
 class TreinadorRequest(TreinadorSchema):
     time_id: UUID
-    data_entrada: datetime
+    data_inicio: datetime
 
 
 class EditTreinadorRequest(TreinadorRequest):
@@ -23,6 +23,7 @@ class EditTreinadorRequest(TreinadorRequest):
 class TecnicoActivationRequest(BaseModel):
     tecnico_id: UUID
     time_id: UUID
+    data_fim: Optional[Union[datetime, None]]
 
     class Config:
         orm_mode = True

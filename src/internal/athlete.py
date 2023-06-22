@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Tuple
 from uuid import uuid4
 
+import pytz
+
 from src.schemas import PessoaSchema, AtletaSchema, IntegracaoIntegraSchema, AtletaRequest
 from src.utils.enums import TipoPessoa
 
@@ -25,7 +27,7 @@ def generate_payload_for_athlete_create(request: AtletaRequest) \
     )
     integracao = IntegracaoIntegraSchema(
         id=uuid4(),
-        data_inicio=datetime.now(),
+        data_inicio=datetime.now(tz=pytz.timezone('America/Sao_Paulo')),
         ativo=True,
         tipo_pessoa=TipoPessoa.atleta.value,
         time_id=request.time_id,

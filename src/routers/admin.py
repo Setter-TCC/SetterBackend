@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
@@ -15,19 +13,13 @@ admin_router = APIRouter(prefix="/admin", dependencies=[Depends(token_validator)
 
 
 @admin_router.get("", tags=["Admin"])
-async def get_admin_data(admin_id: UUID, db: Session = Depends(get_db), token: dict = Depends(token_validator)):
+async def get_admin_data(db: Session = Depends(get_db), token: dict = Depends(token_validator)):
     username = token.get("sub")
-    admin = admin_repository.get_admin_by_id(db=db, id_admin=admin_id)
+    admin = admin_repository.get_admin_by_nome_usuario(db=db, nome_usuario=username)
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Admin not found."
-        )
-
-    if admin.nome_usuario != username:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to retrieve data from this admin."
         )
 
     return JSONResponse(
@@ -38,7 +30,8 @@ async def get_admin_data(admin_id: UUID, db: Session = Depends(get_db), token: d
                 "id": str(admin.id),
                 "nome": admin.pessoa.nome,
                 "email": admin.pessoa.email,
-                "data_nascimento": admin.pessoa.data_nascimento.strftime("%d/%m/%Y"),
+                "data_nascimento": admin.pessoa.data_nascimento.strftime(
+                    "%d/%m/%Y") if admin.pessoa.data_nascimento else None,
                 "cpf": admin.pessoa.cpf,
                 "rg": admin.pessoa.rg,
                 "telefone": admin.pessoa.telefone,
@@ -49,8 +42,8 @@ async def get_admin_data(admin_id: UUID, db: Session = Depends(get_db), token: d
 
 
 @admin_router.put("/update", tags=["Admin"])
-async def update_team(request: AdministradorUpdate, db: Session = Depends(get_db),
-                      token: dict = Depends(token_validator)):
+async def update_admin(request: AdministradorUpdate, db: Session = Depends(get_db),
+                       token: dict = Depends(token_validator)):
     if not request.id:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -89,12 +82,6 @@ async def update_team(request: AdministradorUpdate, db: Session = Depends(get_db
         telefone=request.telefone
     )
 
-    admin = AdministradorSchema(
-        id=request.id,
-        nome_usuario=request.nome_usuario,
-        senha=request.nova_senha
-    )
-
     pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
     if not pessoa_ok:
         db.rollback()
@@ -104,6 +91,13 @@ async def update_team(request: AdministradorUpdate, db: Session = Depends(get_db
         )
 
     if request.senha and request.nova_senha:
+        admin = AdministradorSchema(
+            id=request.id,
+            nome=request.nome,
+            email=request.email,
+            nome_usuario=request.nome_usuario,
+            senha=crypt_context.hash(request.nova_senha)
+        )
         admin_ok = admin_repository.update_admin(db=db, admin=admin)
         if not admin_ok:
             db.rollback()
