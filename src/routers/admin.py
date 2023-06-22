@@ -82,12 +82,6 @@ async def update_admin(request: AdministradorUpdate, db: Session = Depends(get_d
         telefone=request.telefone
     )
 
-    admin = AdministradorSchema(
-        id=request.id,
-        nome_usuario=request.nome_usuario,
-        senha=crypt_context.hash(request.nova_senha)
-    )
-
     pessoa_ok = pessoa_repository.update_pessoa(db=db, pessoa=pessoa)
     if not pessoa_ok:
         db.rollback()
@@ -97,6 +91,13 @@ async def update_admin(request: AdministradorUpdate, db: Session = Depends(get_d
         )
 
     if request.senha and request.nova_senha:
+        admin = AdministradorSchema(
+            id=request.id,
+            nome=request.nome,
+            email=request.email,
+            nome_usuario=request.nome_usuario,
+            senha=crypt_context.hash(request.nova_senha)
+        )
         admin_ok = admin_repository.update_admin(db=db, admin=admin)
         if not admin_ok:
             db.rollback()
