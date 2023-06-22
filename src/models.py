@@ -82,11 +82,13 @@ class TransacaoTransaciona(Base):
     __tablename__ = "transacao_transaciona"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    nome = Column(String, nullable=False)
+    descricao = Column(String, nullable=True)
     data_acontecimento = Column(DateTime, nullable=False)
     tipo = Column(Enum(TipoTransacao), nullable=False)
     valor = Column(Float, nullable=False)
     time_id = Column(UUID(as_uuid=True), ForeignKey("time.id"))
-    pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"))
+    pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"), nullable=True)
 
     time = relationship("Time")
     pessoa = relationship("Pessoa")
