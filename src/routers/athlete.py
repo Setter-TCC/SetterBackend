@@ -94,7 +94,7 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
     )
 
 
-@athlete_router.get("", tags=["Atletas"])
+@athlete_router.get("/active-athletes", tags=["Atletas"])
 async def get_active_atletas_from_time(team_id: UUID, active: bool = True, db: Session = Depends(get_db),
                                        token: dict = Depends(token_validator)):
     await validate_user_authorization(db, team_id, token)
