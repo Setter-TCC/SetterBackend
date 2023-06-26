@@ -44,7 +44,8 @@ def get_transacao_by_id(db: Session, transacao_id: UUID):
 
 def get_transacoes_by_time_id(db: Session, time_id: UUID):
     try:
-        query = db.query(TransacaoTransaciona).filter_by(time_id=time_id).all()
+        query = db.query(TransacaoTransaciona).filter_by(time_id=time_id) \
+            .order_by(TransacaoTransaciona.data_acontecimento.asc()).all()
         return query
 
     except Exception:
@@ -53,20 +54,33 @@ def get_transacoes_by_time_id(db: Session, time_id: UUID):
 
 def get_time_transacoes_by_tipo(db: Session, time_id: UUID, tipo: TipoTransacao):
     try:
-        query = db.query(TransacaoTransaciona).filter_by(time_id=time_id, tipo=tipo).all()
+        query = db.query(TransacaoTransaciona).filter_by(time_id=time_id, tipo=tipo) \
+            .order_by(TransacaoTransaciona.data_acontecimento.asc()).all()
         return query
 
     except Exception:
         return None
 
 
-def get_time_transacoes_by_month(db: Session, time_id: UUID, month: int, year: int): ## Necessário testar
+def get_time_transacoes_by_month(db: Session, time_id: UUID, month: int, year: int):
     try:
         query = db.query(TransacaoTransaciona).filter(
             TransacaoTransaciona.time_id == time_id,
             extract("month", TransacaoTransaciona.data_acontecimento) == month,
             extract("year", TransacaoTransaciona.data_acontecimento) == year
-        ).all()
+        ).order_by(TransacaoTransaciona.data_acontecimento.asc()).all()
+        return query
+
+    except Exception:
+        return None
+
+
+def get_time_transacoes_by_month_and_type(db: Session, time_id: UUID, month: int, year: int, type: int):
+    try:
+        query = db.query(TransacaoTransaciona).filter_by(tipo=TipoTransacao(type), time_id=time_id).filter(
+            extract("month", TransacaoTransaciona.data_acontecimento) == month,
+            extract("year", TransacaoTransaciona.data_acontecimento) == year
+        ).order_by(TransacaoTransaciona.data_acontecimento.asc()).all()
         return query
 
     except Exception:
@@ -75,7 +89,8 @@ def get_time_transacoes_by_month(db: Session, time_id: UUID, month: int, year: i
 
 def get_transacoes_by_pessoa_id(db: Session, pessoa_id: UUID):
     try:
-        query = db.query(TransacaoTransaciona).filter_by(pessoa_id=pessoa_id).all()
+        query = db.query(TransacaoTransaciona).filter_by(pessoa_id=pessoa_id) \
+            .order_by(TransacaoTransaciona.data_acontecimento.asc()).all()
         return query
 
     except Exception:
