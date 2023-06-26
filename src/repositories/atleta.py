@@ -55,6 +55,22 @@ def get_atletas_time(db: Session, time_id: UUID):
         return False
 
 
+def get_active_atletas_time(db: Session, time_id: UUID, active: bool):
+    try:
+        query = db.query(Pessoa, Atleta, IntegracaoIntegra) \
+            .join(Atleta, Pessoa.id == Atleta.id) \
+            .join(IntegracaoIntegra, Pessoa.id == IntegracaoIntegra.pessoa_id) \
+            .filter(IntegracaoIntegra.tipo_pessoa == TipoPessoa.atleta,
+                    IntegracaoIntegra.time_id == time_id,
+                    IntegracaoIntegra.ativo == active) \
+            .order_by(Pessoa.nome.asc()) \
+            .all()
+        return query
+
+    except Exception:
+        return False
+
+
 def update_atleta(db: Session, atleta: AtletaSchema):
     try:
         _atleta = Atleta(
