@@ -347,9 +347,15 @@ async def get_month_balance(team_id: UUID,
     all_transactions = transacao_repository.get_transacoes_by_time_id(db=db, time_id=team_id)
 
     if not all_transactions:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="This team does not have transactions registered."
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "msg": "This team has no transactions for this period.",
+                "value": {
+                    "totalBalance": 0.0,
+                    "lastBalance": 0.0
+                }
+            }
         )
 
     total_balance: float = 0.0
