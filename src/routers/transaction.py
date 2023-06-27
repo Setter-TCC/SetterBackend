@@ -25,7 +25,7 @@ async def create_team_transaction(request: TransacaoSchema, db: Session = Depend
 
     request.data_acontecimento = localize(request.data_acontecimento)
 
-    if request.tipo == TipoTransacao.mensalidade.value or request.tipo == TipoTransacao.salario_tecnico.value:
+    if request.tipo == TipoTransacao.mensalidade.value or request.tipo == TipoTransacao.tecnico.value:
         if not request.pessoa_id:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -48,7 +48,7 @@ async def create_team_transaction(request: TransacaoSchema, db: Session = Depend
     request.id = uuid4()
     request.valor = abs(request.valor)
 
-    if request.tipo == TipoTransacao.salario_tecnico.value or request.tipo == TipoTransacao.despesa.value:
+    if request.tipo == TipoTransacao.tecnico.value or request.tipo == TipoTransacao.despesa.value:
         request.valor *= (-1)
 
     transacao_ok = transacao_repository.create_transacao(db=db, transacao=request)

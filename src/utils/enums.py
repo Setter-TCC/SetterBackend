@@ -23,6 +23,6 @@ class NaipeTime(enum.Enum):
 
 class TipoTransacao(enum.Enum):
     mensalidade = 1
-    salario_tecnico = 2
+    tecnico = 2
     despesa = 3
     ganho = 4

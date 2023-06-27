@@ -3,7 +3,7 @@ from src.utils.enums import TipoTransacao
 
 def get_transaction_origin(team_name: str, transaction_name: str, person_name: str,
                            tipo_transacao: TipoTransacao) -> str:
-    if tipo_transacao == TipoTransacao.despesa or tipo_transacao == TipoTransacao.salario_tecnico:
+    if tipo_transacao == TipoTransacao.despesa or tipo_transacao == TipoTransacao.tecnico:
         return team_name
 
     elif tipo_transacao == TipoTransacao.ganho:
@@ -21,7 +21,7 @@ def get_transaction_destiny(team_name: str, transaction_name: str, person_name: 
     if tipo_transacao == TipoTransacao.ganho or tipo_transacao == TipoTransacao.mensalidade:
         return team_name
 
-    elif tipo_transacao == TipoTransacao.salario_tecnico:
+    elif tipo_transacao == TipoTransacao.tecnico:
         return person_name
 
     elif tipo_transacao == TipoTransacao.despesa:
