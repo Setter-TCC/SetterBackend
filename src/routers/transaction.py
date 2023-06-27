@@ -13,6 +13,7 @@ from src.internal.validators import token_validator, validate_user_authorization
 from src.repositories import transacao_repository, integracao_repository
 from src.schemas import TransacaoSchema
 from src.utils.enums import TipoTransacao
+from src.utils.utc import localize
 
 transaction_router = APIRouter(prefix="/transaction", dependencies=[Depends(token_validator)])
 
@@ -21,6 +22,8 @@ transaction_router = APIRouter(prefix="/transaction", dependencies=[Depends(toke
 async def create_team_transaction(request: TransacaoSchema, db: Session = Depends(get_db),
                                   token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
+
+    request.data_acontecimento = localize(request.data_acontecimento)
 
     if request.tipo == TipoTransacao.mensalidade.value or request.tipo == TipoTransacao.salario_tecnico.value:
         if not request.pessoa_id:
