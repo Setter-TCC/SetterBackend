@@ -365,13 +365,15 @@ async def get_month_balance(team_id: UUID,
     last_balance: float = 0.0
 
     for transaction in all_transactions:
-        if transaction.data_acontecimento.year >= year and transaction.data_acontecimento.month >= month:
+        if (transaction.data_acontecimento.year > year) or (transaction.data_acontecimento.year == year
+                                                            and transaction.data_acontecimento.month > month):
             break
 
         total_balance += transaction.valor
+        last_balance += transaction.valor
 
-        if transaction.data_acontecimento.year != year and transaction.data_acontecimento.month != month:
-            last_balance += transaction.valor
+        if transaction.data_acontecimento.year == year and transaction.data_acontecimento.month == month:
+            last_balance -= transaction.valor
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
