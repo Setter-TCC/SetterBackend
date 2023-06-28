@@ -66,6 +66,12 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
     await validate_user_authorization(db, team_id, token)
 
     atletas = atleta_repository.get_atletas_time(db=db, time_id=team_id)
+    if not atletas:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This team has no athletes registered."
+        )
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
@@ -82,6 +88,39 @@ async def get_atletas_from_time(team_id: UUID, db: Session = Depends(get_db),
                     "telefone": atleta.Pessoa.telefone,
                     "posicao": atleta.Atleta.posicao.value,
                     "ativo": atleta.IntegracaoIntegra.ativo
+                } for atleta in atletas
+            ]
+        }
+    )
+
+
+@athlete_router.get("/active-athletes", tags=["Atletas"])
+async def get_active_atletas_from_time(team_id: UUID, active: bool = True, db: Session = Depends(get_db),
+                                       token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, team_id, token)
+    active_status = "active" if active else "disabled"
+    atletas = atleta_repository.get_active_atletas_time(db=db, time_id=team_id, active=active)
+    if not atletas:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"This team has no {active_status} athletes registered."
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": f"Success fetching all {active_status} athletes.",
+            "value": [
+                {
+                    "id": str(atleta.Pessoa.id),
+                    "nome": atleta.Pessoa.nome,
+                    "email": atleta.Pessoa.email,
+                    "data_nascimento": atleta.Pessoa.data_nascimento.strftime(
+                        "%d/%m/%Y") if atleta.Pessoa.data_nascimento else None,
+                    "cpf": atleta.Pessoa.cpf,
+                    "rg": atleta.Pessoa.rg,
+                    "telefone": atleta.Pessoa.telefone,
+                    "posicao": atleta.Atleta.posicao.value,
                 } for atleta in atletas
             ]
         }

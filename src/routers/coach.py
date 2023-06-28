@@ -84,7 +84,7 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
             detail="This team has more than 1 active coach."
         )
 
-    if len(coaches) < 1:
+    if not coaches:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={

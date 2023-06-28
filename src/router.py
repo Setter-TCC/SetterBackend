@@ -7,6 +7,7 @@ from src.routers.athlete import athlete_router
 from src.routers.coach import coach_router
 from src.routers.team import team_router
 from src.routers.token import token_router
+from src.routers.transaction import transaction_router
 
 env = get_environment_variables()
 
@@ -32,3 +33,4 @@ def init_routes(app: FastAPI):
     app.include_router(athlete_router, prefix=BASE_PATH)
     app.include_router(coach_router, prefix=BASE_PATH)
     app.include_router(admin_router, prefix=BASE_PATH)
+    app.include_router(transaction_router, prefix=BASE_PATH)
