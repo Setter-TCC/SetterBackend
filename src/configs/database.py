@@ -5,7 +5,7 @@ from src.configs.environment import get_environment_variables
 
 env = get_environment_variables()
 
-Engine = create_engine(env.DATABASE_URL)
+Engine = create_engine(env.DATABASE_URL.replace("postgres://", "postgresql://"))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
 
 
