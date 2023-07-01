@@ -9,7 +9,7 @@ from src.configs.environment import get_environment_variables
 from src.repositories import admin_repository
 
 
-def generate_payload(username: str, expire_in: int = 30) -> Dict[str, Union[str, datetime]]:
+def generate_payload(username: str, expire_in: int = 120) -> Dict[str, Union[str, datetime]]:
     sub = username
     exp = datetime.utcnow() + timedelta(minutes=expire_in)
     return {
