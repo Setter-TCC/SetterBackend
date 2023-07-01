@@ -19,7 +19,7 @@ coach_router = APIRouter(prefix="/coach", dependencies=[Depends(token_validator)
 @coach_router.post("/create", tags=["Técnico"])
 async def create_coach(request: TreinadorRequest, db: Session = Depends(get_db),
                        token: dict = Depends(token_validator)):
-    await validate_user_authorization(db, request.time_id, token)
+    # await validate_user_authorization(db, request.time_id, token)
 
     active_coaches = tecnico_repository.get_coach_from_team(db=db, time_id=request.time_id)
     if len(active_coaches) >= 1:
@@ -74,7 +74,7 @@ async def create_coach(request: TreinadorRequest, db: Session = Depends(get_db),
 @coach_router.get("", tags=["Técnico"])
 async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db),
                                      token: dict = Depends(token_validator)):
-    await validate_user_authorization(db, team_id, token)
+    # await validate_user_authorization(db, team_id, token)
 
     coaches = tecnico_repository.get_coach_from_team(db=db, time_id=team_id)
 
@@ -117,7 +117,7 @@ async def get_active_coach_from_team(team_id: UUID, db: Session = Depends(get_db
 @coach_router.post("/deactivate", tags=["Técnico"])
 async def deactivate_coach(request: TecnicoActivationRequest, db: Session = Depends(get_db),
                            token: dict = Depends(token_validator)):
-    await validate_user_authorization(db, request.time_id, token)
+    # await validate_user_authorization(db, request.time_id, token)
 
     integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.tecnico_id,
                                                                           team_id=request.time_id)
@@ -150,7 +150,7 @@ async def deactivate_coach(request: TecnicoActivationRequest, db: Session = Depe
 @coach_router.put("/update", tags=["Técnico"])
 async def update_coach(request: EditTreinadorRequest, db: Session = Depends(get_db),
                        token: dict = Depends(token_validator)):
-    await validate_user_authorization(db, request.time_id, token)
+    # await validate_user_authorization(db, request.time_id, token)
 
     tecnico, pessoa, integracao_tecnico = generate_payload_for_coach_update(db=db, request=request)
 
