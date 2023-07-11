@@ -13,7 +13,7 @@ Para contribuir com o projeto é muito fácil e cada pouquinho conta! Basta segu
 
 ### Política de Issues
 
-As *issues* devem possuir título, descrição, no mínimo um assinante responsável, *labels*.
+As *issues* devem possuir título, descrição, no mínimo um assinante responsável e *labels*.
 
 Caso seja uma nova funcionalidade, que engloba o Frontend e Backend, ela pode ser criada no [Repositório de Documentação](https://github.com/Setter-TCC/SetterDocs). Caso seja um *bug*, a *issue* pode ser criada no repositório onde o problema foi identificado.
 
@@ -48,8 +48,8 @@ Para que ambos envolvidos no commit sejam incluidos como contribuintes no gráfi
 ```
 [5] Fazendo guia de contribuição
 
-Co-authored-by: Fulano <fulano@outlook.com>
-Co-authored-by: Beltrano <beltrano@gmail.com>
+Co-authored-by: Fulano <fulano@email1.com>
+Co-authored-by: Beltrano <beltrano@email2.com>
 
 ```
 
