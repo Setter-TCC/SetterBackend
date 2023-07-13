@@ -19,7 +19,6 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
                          token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    request.id = uuid4()
     atleta, integracao, pessoa_atleta = generate_payload_for_athlete_create(request)
 
     pessoa_atleta_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)
