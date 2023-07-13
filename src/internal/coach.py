@@ -10,6 +10,7 @@ from src.utils.enums import TipoPessoa
 
 def generate_payload_for_coach_create(request: TreinadorRequest) \
         -> Tuple[TreinadorSchema, IntegracaoIntegraSchema, PessoaSchema]:
+    request.id = uuid4()
     pessoa_tecnico = PessoaSchema(
         id=request.id,
         nome=request.nome,
