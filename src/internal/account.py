@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 from uuid import uuid4
 
 import pytz
@@ -10,10 +10,7 @@ from src.utils.crypt import crypt_context
 from src.utils.enums import TipoPessoa
 
 
-def generate_payload_for_account_create(request: ContaRequest) -> (bool, bool, TimeSchema, PessoaSchema,
-                                                                   AdministradorSchema, IntegracaoIntegraSchema,
-                                                                   Optional[TreinadorSchema], Optional[PessoaSchema],
-                                                                   Optional[IntegracaoIntegraSchema]):
+def generate_payload_for_account_create(request: ContaRequest):
     coach_sent: bool = request.treinador is not None
     coach_is_admin = request.administrador.email == request.treinador.email if coach_sent else False
 
