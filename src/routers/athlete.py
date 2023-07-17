@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from src.configs.database import get_db
 from src.internal.athlete import generate_payload_for_athlete_create
 from src.internal.validators import validate_user_authorization, token_validator
-from src.repositories import integracao_repository, pessoa_repository, atleta_repository
+from src.repositories import integracao_repository, pessoa_repository, atleta_repository, admin_repository
 from src.schemas import AtletaRequest, AtletaActivationRequest, PessoaSchema, AtletaSchema
 
 athlete_router = APIRouter(prefix="/athlete", dependencies=[Depends(token_validator)])
@@ -19,21 +19,30 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
                          token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    request.id = uuid4()
     atleta, integracao, pessoa_atleta = generate_payload_for_athlete_create(request)
 
-    pessoa_atleta_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)
-    if not pessoa_atleta_ok:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail="Could not create person entity on database."
-        )
+    username = token.get("sub")
+    user_on_db = admin_repository.get_admin_by_nome_usuario(db=db, nome_usuario=username)
+    admin_athlete = False
+    if user_on_db.pessoa.email == pessoa_atleta.email:
+        admin_athlete = True
+        atleta.id = user_on_db.id
+        integracao.pessoa_id = atleta.id
+
+    if not admin_athlete:
+        pessoa_atleta_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)
+        if not pessoa_atleta_ok:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_424_FAILED_DEPENDENCY,
+                detail="Could not create person entity on database."
+            )
 
     atleta_ok = atleta_repository.create_atleta(db=db, atleta=atleta)
     if not atleta_ok:
         db.rollback()
-        pessoa_repository.delete_pessoa(db=db, pessoa_id=pessoa_atleta.id)
+        if not admin_athlete:
+            pessoa_repository.delete_pessoa(db=db, pessoa_id=pessoa_atleta.id)
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail="Could not create athlete entity on database."
@@ -132,8 +141,8 @@ async def deactivate_athlete(request: AtletaActivationRequest, db: Session = Dep
                              token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
-                                                                          team_id=request.time_id)
+    integracao = integracao_repository.get_atleta_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                                 team_id=request.time_id)
     if not integracao:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -162,8 +171,8 @@ async def activate_athlete(request: AtletaActivationRequest, db: Session = Depen
                            token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
-                                                                          team_id=request.time_id)
+    integracao = integracao_repository.get_atleta_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                                 team_id=request.time_id)
     if not integracao:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

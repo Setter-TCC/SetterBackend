@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4, UUID
+from uuid import UUID
 
 import pytz
 from fastapi import APIRouter, Depends, HTTPException
@@ -30,7 +30,6 @@ async def create_coach(request: TreinadorRequest, db: Session = Depends(get_db),
             }
         )
 
-    request.id = uuid4()
     tecnico, integracao, pessoa_atleta = generate_payload_for_coach_create(request)
 
     pessoa_tecnico_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)

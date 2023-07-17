@@ -1,24 +1,20 @@
 from datetime import datetime
-from uuid import uuid4
 
-import pytz
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from src.configs.database import get_db
+from src.internal.account import generate_payload_for_account_create
 from src.repositories import (admin_repository,
                               integracao_repository,
                               pessoa_repository,
                               tecnico_repository,
                               time_repository)
 from src.schemas import (ContaRequest,
-                         LoginSchema,
-                         IntegracaoIntegraSchema,
-                         PessoaSchema)
+                         LoginSchema)
 from src.utils.crypt import crypt_context
-from src.utils.enums import TipoPessoa
 from src.utils.jwt import generate_payload, generate_token
 
 account_router = APIRouter(prefix="/account")
@@ -26,20 +22,10 @@ account_router = APIRouter(prefix="/account")
 
 @account_router.post("/register", tags=["Conta"])
 async def create_account(request: ContaRequest, db: Session = Depends(get_db)):
-    coach_sent: bool = request.treinador is not None
-    coach_is_admin = request.administrador.email == request.treinador.email if coach_sent else False
-
-    # ID's normalization
-    request.administrador.id = uuid4()
-    request.time.id = uuid4()
-    if coach_sent:
-        if coach_is_admin:
-            request.treinador.id = request.administrador.id
-        else:
-            request.treinador.id = uuid4()
+    coach_sent, coach_is_admin, team, admin_person, admin, \
+        admin_integration, coach, coach_person, coach_integration = generate_payload_for_account_create(request)
 
     # Team
-    team = request.time
     team_ok = time_repository.create_time(db=db, time=team)
     if not team_ok:
         db.rollback()
@@ -49,17 +35,6 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)):
         )
 
     # Admin manipulation
-    admin_person = PessoaSchema(id=request.administrador.id, nome=request.administrador.nome,
-                                email=request.administrador.email, cpf=request.administrador.cpf,
-                                rg=request.administrador.rg, data_nascimento=request.administrador.data_nascimento,
-                                telefone=request.administrador.telefone)
-    admin = request.administrador
-    admin.senha = crypt_context.hash(admin.senha)
-    admin_integration = IntegracaoIntegraSchema(id=uuid4(),
-                                                data_inicio=datetime.now(tz=pytz.timezone('America/Sao_Paulo')),
-                                                data_fim=None, ativo=True, time_id=team.id,
-                                                tipo_pessoa=TipoPessoa.administrador.value, pessoa_id=admin.id)
-
     admin_person_ok = pessoa_repository.create_pessoa(db=db, pessoa=admin_person)
     if not admin_person_ok:
         db.rollback()
@@ -93,23 +68,14 @@ async def create_account(request: ContaRequest, db: Session = Depends(get_db)):
     # Coach
     coach_msg = ""
     if coach_sent:
-        coach = request.treinador
         should_create_coach = True
 
         if not coach_is_admin:
-            coach_person = PessoaSchema(id=request.treinador.id, nome=request.treinador.nome,
-                                        email=request.treinador.email, cpf=request.treinador.cpf,
-                                        rg=request.treinador.rg, data_nascimento=request.treinador.data_nascimento,
-                                        telefone=request.treinador.telefone)
             should_create_coach = pessoa_repository.create_pessoa(db=db, pessoa=coach_person)
 
         if should_create_coach:
             coach_ok = tecnico_repository.create_tecnico(db=db, tecnico=coach)
             if coach_ok:
-                coach_integration = IntegracaoIntegraSchema(id=uuid4(), data_inicio=datetime.now(
-                    tz=pytz.timezone('America/Sao_Paulo')), data_fim=None,
-                                                            ativo=True, tipo_pessoa=TipoPessoa.tecnico.value,
-                                                            time_id=team.id, pessoa_id=coach.id)
                 coach_integration_ok = integracao_repository.create_integracao(db=db, integracao=coach_integration)
 
                 if not coach_integration_ok:
