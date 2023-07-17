@@ -142,8 +142,8 @@ async def deactivate_athlete(request: AtletaActivationRequest, db: Session = Dep
                              token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
-                                                                          team_id=request.time_id)
+    integracao = integracao_repository.get_atleta_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                                 team_id=request.time_id)
     if not integracao:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -172,8 +172,8 @@ async def activate_athlete(request: AtletaActivationRequest, db: Session = Depen
                            token: dict = Depends(token_validator)):
     await validate_user_authorization(db, request.time_id, token)
 
-    integracao = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
-                                                                          team_id=request.time_id)
+    integracao = integracao_repository.get_atleta_integracao_by_user_and_team_id(db=db, user_id=request.atleta_id,
+                                                                                 team_id=request.time_id)
     if not integracao:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

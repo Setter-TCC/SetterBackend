@@ -56,6 +56,28 @@ def get_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_id: UUID
         return False
 
 
+def get_atleta_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_id: UUID):
+    try:
+        query = db.query(IntegracaoIntegra) \
+            .filter_by(time_id=team_id, pessoa_id=user_id, tipo_pessoa=TipoPessoa.atleta) \
+            .first()
+        return query
+
+    except Exception:
+        return False
+
+
+def get_admin_integracao_by_user_and_team_id(db: Session, user_id: UUID, team_id: UUID):
+    try:
+        query = db.query(IntegracaoIntegra) \
+            .filter_by(time_id=team_id, pessoa_id=user_id, tipo_pessoa=TipoPessoa.administrador) \
+            .first()
+        return query
+
+    except Exception:
+        return False
+
+
 def get_integracoes_by_time_id(db: Session, time_id: UUID):
     try:
         query = db.query(IntegracaoIntegra).filter_by(time_id=time_id).all()

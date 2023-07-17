@@ -22,8 +22,8 @@ async def validate_user_authorization(db: Session, time_id: UUID, token: dict):
             detail="User not found."
         )
 
-    integracao_on_db = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=user_on_db.id,
-                                                                                team_id=time_id)
+    integracao_on_db = integracao_repository.get_admin_integracao_by_user_and_team_id(db=db, user_id=user_on_db.id,
+                                                                                      team_id=time_id)
     if not integracao_on_db:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
