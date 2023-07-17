@@ -27,6 +27,8 @@ async def create_atletas(request: AtletaRequest, db: Session = Depends(get_db),
     admin_athlete = False
     if user_on_db.pessoa.email == pessoa_atleta.email:
         admin_athlete = True
+        atleta.id = user_on_db.id
+        integracao.pessoa_id = atleta.id
 
     if not admin_athlete:
         pessoa_atleta_ok = pessoa_repository.create_pessoa(db=db, pessoa=pessoa_atleta)
