@@ -22,18 +22,24 @@ async def validate_user_authorization(db: Session, time_id: UUID, token: dict):
             detail="User not found."
         )
 
-    integracao_on_db = integracao_repository.get_integracao_by_user_and_team_id(db=db, user_id=user_on_db.id,
-                                                                                team_id=time_id)
+    integracao_on_db = integracao_repository.get_admin_integracao_by_user_and_team_id(db=db, user_id=user_on_db.id,
+                                                                                      team_id=time_id)
     if not integracao_on_db:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User is not allowed to modify this team."
+            detail="User is not allowed to modify this team because it was not found."
+        )
+
+    if not integracao_on_db.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User is not allowed to modify this team becausa it is not active."
         )
 
     if not integracao_on_db.ativo or integracao_on_db.tipo_pessoa != TipoPessoa.administrador:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User is not allowed to modify this team."
+            detail=f"User is not allowed to modify this team becausa it is not an admin."
         )
 
 
