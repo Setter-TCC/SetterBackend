@@ -45,7 +45,7 @@ def get_presenca_by_id(db: Session, presenca_id: UUID):
 
 def get_presencas_by_evento_id(db: Session, evento_id: UUID):
     try:
-        query = db.query(Presenca).filter_by(evento_id=evento_id).first()
+        query = db.query(Presenca).filter_by(evento_id=evento_id).all()
         return query
 
     except Exception:

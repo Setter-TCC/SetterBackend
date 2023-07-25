@@ -1,5 +1,7 @@
-from uuid import uuid4
+from datetime import datetime
+from uuid import uuid4, UUID
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
@@ -46,7 +48,7 @@ async def create_team_event(request: EventoRequest, db: Session = Depends(get_db
             justified = False
 
         elif athlete.estado == EstadoAtletaEvento.justificado.value:
-            fault = False
+            fault = True
             justified = True
 
         justified_value = None
@@ -61,5 +63,73 @@ async def create_team_event(request: EventoRequest, db: Session = Depends(get_db
         status_code=status.HTTP_200_OK,
         content={
             "msg": "Created event succesfully.",
+        }
+    )
+
+
+@evento_router.get("/month", tags=["Evento"])
+async def get_team_month_events(team_id: UUID, month: int = datetime.now(tz=pytz.timezone('America/Sao_Paulo')).month,
+                                year: int = datetime.now(tz=pytz.timezone('America/Sao_Paulo')).year,
+                                db: Session = Depends(get_db), token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, team_id, token)
+
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enter a valid month"
+        )
+
+    if year > datetime.now(tz=pytz.timezone('America/Sao_Paulo')).year or year < 1895:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enter a valid year"
+        )
+
+    month_events = evento_repository.get_team_eventos_by_month(db=db, team_id=team_id, month=month, year=year)
+
+    if not month_events:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This team does not have events registered for this month."
+        )
+
+    return_payload = []
+
+    for event in month_events:
+        event_presences = presenca_repository.get_presencas_by_evento_id(db=db, evento_id=event.id)
+
+        presence_count = 0
+        fault_count = 0
+        justified_count = 0
+
+        for presence in event_presences:
+            if presence.falta and not presence.justificado:
+                fault_count += 1
+
+            elif presence.falta and presence.justificado:
+                justified_count += 1
+
+            elif not presence.falta:
+                presence_count += 1
+
+        return_payload.append({
+            "id": str(event.id),
+            "nome": event.nome,
+            "tipo": event.tipo_evento.name,
+            "data": event.data.strftime("%Y-%m-%dT%H:%M:%S"),
+            "local": event.local,
+            "presencas": presence_count,
+            "faltas": fault_count,
+            "justificados": justified_count,
+            "adversario": event.adversario,
+            "campeonato": event.campeonato,
+            "observacao": event.observacao,
+        })
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Success fetching month events.",
+            "value": return_payload
         }
     )
