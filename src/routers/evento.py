@@ -133,3 +133,55 @@ async def get_team_month_events(team_id: UUID, month: int = datetime.now(tz=pytz
             "value": return_payload
         }
     )
+
+
+@evento_router.get("/detail", tags=["Evento"])
+async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(get_db),
+                           token: dict = Depends(token_validator)):
+    await validate_user_authorization(db, team_id, token)
+
+    event = evento_repository.get_evento_by_id(db=db, evento_id=event_id)
+
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found."
+        )
+
+    event_presences = presenca_repository.get_presencas_by_evento_id(db=db, evento_id=event.id)
+
+    presence_count = 0
+    fault_count = 0
+    justified_count = 0
+
+    for presence in event_presences:
+        if presence.falta and not presence.justificado:
+            fault_count += 1
+
+        elif presence.falta and presence.justificado:
+            justified_count += 1
+
+        elif not presence.falta:
+            presence_count += 1
+
+    return_payload = {
+        "id": str(event.id),
+        "nome": event.nome,
+        "tipo": event.tipo_evento.name,
+        "data": event.data.strftime("%Y-%m-%dT%H:%M:%S"),
+        "local": event.local,
+        "presencas": presence_count,
+        "faltas": fault_count,
+        "justificados": justified_count,
+        "adversario": event.adversario,
+        "campeonato": event.campeonato,
+        "observacao": event.observacao,
+    }
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Success fetching event.",
+            "value": return_payload
+        }
+    )
