@@ -28,7 +28,7 @@ async def create_team_event(request: EventoRequest, db: Session = Depends(get_db
     _evento = EventoSchema(id=request.id, tipo_evento=request.tipo_evento, data=request.data, local=request.local,
                            nome=request.nome, adversario=request.adversario, campeonato=request.campeonato,
                            observacao=request.observacao, time_id=request.time_id)
-    evento_ok = evento_repository.create_evento(db=db, evento=request)
+    evento_ok = evento_repository.create_evento(db=db, evento=_evento)
     if not evento_ok:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -183,5 +183,51 @@ async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(
         content={
             "msg": "Success fetching event.",
             "value": return_payload
+        }
+    )
+
+
+@evento_router.put("/update", tags=["Admin"])
+async def update_admin(request: EventoRequest, db: Session = Depends(get_db),
+                       token: dict = Depends(token_validator)):
+    _evento = EventoSchema(id=request.id, tipo_evento=request.tipo_evento, data=request.data, local=request.local,
+                           nome=request.nome, adversario=request.adversario, campeonato=request.campeonato,
+                           observacao=request.observacao, time_id=request.time_id)
+    evento_ok = evento_repository.update_evento(db=db, evento=_evento)
+    if not evento_ok:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail="Could not update event"
+        )
+
+    for athlete in request.lista_de_atletas:
+        fault = False
+        justified = False
+
+        if athlete.estado == EstadoAtletaEvento.presente.value:
+            fault = False
+            justified = False
+
+        elif athlete.estado == EstadoAtletaEvento.falta.value:
+            fault = True
+            justified = False
+
+        elif athlete.estado == EstadoAtletaEvento.justificado.value:
+            fault = True
+            justified = True
+
+        justified_value = None
+        if justified:
+            justified_value = athlete.justificativa
+
+        athlete_presence = PresencaSchema(id=athlete.id, falta=fault, justificado=justified,
+                                          justificativa=justified_value,
+                                          pessoa_id=athlete.id_atleta, evento_id=request.id)
+        presenca_repository.update_presenca(db=db, presenca=athlete_presence)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "msg": "Updated event succesfully.",
         }
     )

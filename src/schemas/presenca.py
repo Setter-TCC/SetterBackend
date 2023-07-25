@@ -20,6 +20,7 @@ class PresencaSchema(BaseModel):
 
 class PresencaRequest(BaseModel):
     id_atleta: UUID
+    id: Optional[UUID]
     nome: str
     estado: int
     justificativa: Optional[str]
