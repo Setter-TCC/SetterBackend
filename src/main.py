@@ -10,7 +10,7 @@ from src.router import init_routes
 env = get_environment_variables()
 Base.metadata.create_all(bind=Engine)
 
-app = FastAPI(  # TODO: Padronizar a linguagem de escrita do app
+app = FastAPI(
     title="SETTER",
     version=__version__,
     description="API REST relativa ao Setter, software especializado em gestão desportiva de times de vôlei.",

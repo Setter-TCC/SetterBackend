@@ -12,7 +12,7 @@ class PessoaSchema(BaseModel):
     cpf: Optional[str] = None
     rg: Optional[str] = None
     data_nascimento: Optional[datetime] = None
-    telefone: Optional[str] = None  # TODO: Fazer validação de tamanho
+    telefone: Optional[str] = None
 
     class Config:
         orm_mode = True
