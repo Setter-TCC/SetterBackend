@@ -115,7 +115,7 @@ async def get_team_month_events(team_id: UUID, month: int = datetime.now(tz=pytz
         return_payload.append({
             "id": str(event.id),
             "nome": event.nome,
-            "tipo": event.tipo_evento.name,
+            "tipo_evento": event.tipo_evento.value,
             "data": event.data.strftime("%Y-%m-%dT%H:%M:%S"),
             "local": event.local,
             "presencas": presence_count,
