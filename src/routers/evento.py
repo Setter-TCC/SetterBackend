@@ -167,7 +167,7 @@ async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(
     return_payload = {
         "id": str(event.id),
         "nome": event.nome,
-        "tipo": event.tipo_evento.name,
+        "tipo_evento": event.tipo_evento.value,
         "data": event.data.strftime("%Y-%m-%dT%H:%M:%S"),
         "local": event.local,
         "presencas": presence_count,
