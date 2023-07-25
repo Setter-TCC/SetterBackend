@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.utils.enums import PosicaoAtleta, NaipeTime, TipoPessoa, TipoTransacao
+from src.utils.enums import PosicaoAtleta, NaipeTime, TipoPessoa, TipoTransacao, TipoEvento
 
 Base = declarative_base()
 
@@ -91,4 +91,34 @@ class TransacaoTransaciona(Base):
     pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"), nullable=True)
 
     time = relationship("Time")
+    pessoa = relationship("Pessoa")
+
+
+class Evento(Base):
+    __tablename__ = "evento"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    tipo_evento = Column(Enum(TipoEvento), nullable=False)
+    data = Column(DateTime, nullable=False)
+    local = Column(String, nullable=True)
+    nome = Column(String, nullable=True)
+    adversario = Column(String, nullable=True)
+    campeonato = Column(String, nullable=True)
+    time_id = Column(UUID(as_uuid=True), ForeignKey("time.id"))
+
+    time = relationship("Time")
+
+
+class Presenca(Base):
+    __tablename__ = "presenca"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    falta = Column(Boolean, nullable=False, default=False)
+    justificado = Column(Boolean, nullable=False, default=False)
+    justificativa = Column(String, nullable=True)
+    evento_id = Column(UUID(as_uuid=True), ForeignKey("evento.id"))
+    pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"))
+
+    evento = relationship("evento")
     pessoa = relationship("Pessoa")

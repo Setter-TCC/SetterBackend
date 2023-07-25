@@ -26,3 +26,9 @@ class TipoTransacao(enum.Enum):
     tecnico = 2
     despesa = 3
     ganho = 4
+
+
+class TipoEvento(enum.Enum):
+    jogo = 1
+    treino = 2
+    evento = 3
