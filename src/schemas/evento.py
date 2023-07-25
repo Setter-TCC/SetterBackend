@@ -16,6 +16,7 @@ class EventoSchema(BaseModel):
     nome: Optional[str] = None
     adversario: Optional[str] = None
     campeonato: Optional[str] = None
+    observacao: Optional[str] = None
     time_id: UUID
 
     @validator("tipo_evento")

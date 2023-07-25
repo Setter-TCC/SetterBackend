@@ -32,7 +32,7 @@ async def create_team_event(request: EventoSchema, db: Session = Depends(get_db)
     athletes = atleta_repository.get_active_atletas_time(db=db, time_id=request.time_id, active=True)
     for athlete in athletes:
         athlete_presence = PresencaSchema(id=uuid4(), falta=False, justificado=False, justificativa=None,
-                                          pessoa_id=athlete.id, evento_id=request.id)
+                                          pessoa_id=athlete.Pessoa.id, evento_id=request.id)
         presenca_repository.create_presenca(db=db, presenca=athlete_presence)
 
     return JSONResponse(

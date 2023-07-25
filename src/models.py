@@ -104,6 +104,7 @@ class Evento(Base):
     nome = Column(String, nullable=True)
     adversario = Column(String, nullable=True)
     campeonato = Column(String, nullable=True)
+    observacao = Column(String, nullable=True)
     time_id = Column(UUID(as_uuid=True), ForeignKey("time.id"))
 
     time = relationship("Time")
@@ -120,5 +121,5 @@ class Presenca(Base):
     evento_id = Column(UUID(as_uuid=True), ForeignKey("evento.id"))
     pessoa_id = Column(UUID(as_uuid=True), ForeignKey("pessoa.id"))
 
-    evento = relationship("evento")
+    evento = relationship("Evento")
     pessoa = relationship("Pessoa")
