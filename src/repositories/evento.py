@@ -18,6 +18,7 @@ def create_evento(db: Session, evento: EventoSchema):
             nome=evento.nome,
             adversario=evento.adversario,
             campeonato=evento.campeonato,
+            observacao=evento.observacao,
             time_id=evento.time_id
         )
         db.add(_evento)
@@ -76,7 +77,8 @@ def update_evento(db: Session, evento: EventoSchema):
             "local": evento.local,
             "nome": evento.nome,
             "adversario": evento.adversario,
-            "campeonato": evento.campeonato
+            "campeonato": evento.campeonato,
+            "observacao": evento.observacao
         })
         db.commit()
         return query

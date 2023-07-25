@@ -32,3 +32,9 @@ class TipoEvento(enum.Enum):
     jogo = 1
     treino = 2
     evento = 3
+
+
+class EstadoAtletaEvento(enum.Enum):
+    presente = 1
+    falta = 2
+    justificado = 3

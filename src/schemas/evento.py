@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel
 from pydantic import validator
 
+from src.schemas.presenca import PresencaRequest
 from src.utils.enums import TipoEvento
 
 
@@ -33,3 +34,7 @@ class EventoSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class EventoRequest(EventoSchema):
+    lista_de_atletas: List[PresencaRequest]
