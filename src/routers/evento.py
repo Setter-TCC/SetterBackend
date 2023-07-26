@@ -171,8 +171,8 @@ async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(
             presence_count += 1
 
         lista_de_presenca.append({
-            "id": presence.id,
-            "id_atleta": presence.pessoa_id,
+            "id": str(presence.id),
+            "id_atleta": str(presence.pessoa_id),
             "nome": presence.pessoa.nome,
             "estado": state,
             "justificativa": presence.justificativa
