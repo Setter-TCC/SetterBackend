@@ -7,7 +7,7 @@ from pydantic import BaseSettings
 @lru_cache
 def get_env_filename():
     runtime_env = os.getenv("ENV")
-    return ".env.local"  # TODO: Remover o hardcoded quando for publicar o app
+    return ".env.local"
 
 
 class EnvironmentSettings(BaseSettings):
