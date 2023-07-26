@@ -35,7 +35,7 @@ async def create_team_event(request: EventoRequest, db: Session = Depends(get_db
             detail="Could not create event"
         )
 
-    for athlete in request.lista_de_atletas:
+    for athlete in request.lista_de_presenca:
         fault = False
         justified = False
 
@@ -215,7 +215,7 @@ async def update_admin(request: EventoRequest, db: Session = Depends(get_db),
             detail="Could not update event"
         )
 
-    for athlete in request.lista_de_atletas:
+    for athlete in request.lista_de_presenca:
         fault = False
         justified = False
 

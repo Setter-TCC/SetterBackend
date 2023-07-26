@@ -37,4 +37,4 @@ class EventoSchema(BaseModel):
 
 
 class EventoRequest(EventoSchema):
-    lista_de_atletas: List[PresencaRequest]
+    lista_de_presenca: List[PresencaRequest]
