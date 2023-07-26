@@ -154,15 +154,29 @@ async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(
     fault_count = 0
     justified_count = 0
 
+    lista_de_presenca = []
+
     for presence in event_presences:
+        state = 0
         if presence.falta and not presence.justificado:
+            state = 2
             fault_count += 1
 
         elif presence.falta and presence.justificado:
+            state = 3
             justified_count += 1
 
         elif not presence.falta:
+            state = 1
             presence_count += 1
+
+        lista_de_presenca.append({
+            "id": presence.id,
+            "id_atleta": presence.pessoa_id,
+            "nome": presence.pessoa.nome,
+            "estado": state,
+            "justificativa": presence.justificativa
+        })
 
     return_payload = {
         "id": str(event.id),
@@ -176,6 +190,7 @@ async def get_event_detail(event_id: UUID, team_id: UUID, db: Session = Depends(
         "adversario": event.adversario,
         "campeonato": event.campeonato,
         "observacao": event.observacao,
+        "lista_de_presenca": lista_de_presenca
     }
 
     return JSONResponse(
