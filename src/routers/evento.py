@@ -116,7 +116,7 @@ async def get_team_month_events(team_id: UUID, month: int = datetime.now(tz=pytz
             "id": str(event.id),
             "nome": event.nome,
             "tipo_evento": event.tipo_evento.value,
-            "data": event.data.strftime("%Y-%m-%dT%H:%M:%S"),
+            "data": event.data.strftime("%d/%m/%Y"),
             "local": event.local,
             "presencas": presence_count,
             "faltas": fault_count,
